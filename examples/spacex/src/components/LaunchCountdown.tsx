@@ -18,7 +18,7 @@ const digitLabel = "inline-block text-right uppercase w-max text-[#F0F0FAE6] fon
 
 export default function LaunchCountdown() {
   return (
-    <div className="absolute right-[round(5%,1px)]">
+    <div className="absolute right-[round(5%,1px)] top-4">
       <div className="items-center [border-block-end-style:solid] [border-block-start-style:solid] [border-inline-end-style:solid] [border-inline-start-style:solid] inline-flex h-7.75 rounded-sm px-2.5 [border-width:0.555556px] border-solid border-[#FFFFFF40]">
         <div className="tracking-[1px] relative uppercase top-px w-max text-[#F0F0FAE6] font-sans shrink-0 text-[10px]/[9.4px]">
           Upcoming Launches

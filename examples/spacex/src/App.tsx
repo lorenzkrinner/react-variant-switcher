@@ -3,6 +3,7 @@
  * https://app.paper.design/file/01KNVY3KDX0AF0T2KXS3R522Y3?node=1-0
  * on Apr 10, 2026
  */
+import { VariantGroup, VariantOption } from 'react-variant-switcher';
 import LaunchCountdown from './components/LaunchCountdown';
 import Navbar from './components/Navbar';
 import HeroSlide from './components/HeroSlide';
@@ -10,7 +11,7 @@ import Footer from './components/Footer';
 
 export default function App() {
   return (
-    <div className="[font-synthesis:none] flex flex-col w-404.25 h-1195 bg-black antialiased text-xs/4">
+    <div className="[font-synthesis:none] flex flex-col w-404.25 h-1195 bg-black antialiased text-xs/4 max-w-full">
       <div className="basis-[0%] grow">
         <div className="flex flex-col justify-end min-h-[880.667px] w-full">
           <div className="relative">
@@ -24,21 +25,67 @@ export default function App() {
           <div className="">
             <div className="w-full">
               <div className="">
-                <HeroSlide
-                  title="Making life multiplanetary"
-                  description="SpaceX was founded under the belief that a future where humanity is out exploring the stars is fundamentally more exciting than one where we are not."
-                  ctaLabel="EXPLORE"
-                  align="left"
-                  centered
-                />
-                <HeroSlide
-                  title="Revolutionizing space technology"
-                  description="SpaceX's Starship spacecraft and Super Heavy rocket is a fully reusable transportation system designed to carry both crew and cargo to Earth orbit, the Moon, Mars, and beyond."
-                  ctaLabel="LEARN MORE"
-                  align="right"
-                  backgroundImage="https://app.paper.design/file-assets/01KNVY3KDX0AF0T2KXS3R522Y3/0VKRWSSBY2KNGE6SM18JVWMSF8.jpg"
-                  gradientStyle="linear-gradient(in oklab 90deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0 / 80%) 100%)"
-                />
+                <VariantGroup name="Hero">
+                  <VariantOption id="multiplanetary" label="Multiplanetary" default>
+                    <HeroSlide
+                      title="Making life multiplanetary"
+                      description="SpaceX was founded under the belief that a future where humanity is out exploring the stars is fundamentally more exciting than one where we are not."
+                      ctaLabel="EXPLORE"
+                      align="left"
+                      centered
+                    />
+                  </VariantOption>
+                  <VariantOption id="mars-colony" label="Mars Colony">
+                    <HeroSlide
+                      title="Building humanity's first Mars colony"
+                      description="Our mission is to establish a permanent, self-sustaining human presence on Mars — making humanity a truly interplanetary species within our lifetime."
+                      ctaLabel="SEE THE PLAN"
+                      align="left"
+                      centered
+                    />
+                  </VariantOption>
+                  <VariantOption id="beyond-earth" label="Beyond Earth">
+                    <HeroSlide
+                      title="The next giant leap starts here"
+                      description="From the first orbital flights to landing on Mars, every mission brings us closer to a future among the stars. The journey beyond Earth begins now."
+                      ctaLabel="FOLLOW THE JOURNEY"
+                      align="left"
+                      centered
+                    />
+                  </VariantOption>
+                </VariantGroup>
+                <VariantGroup name="Technology">
+                  <VariantOption id="revolutionizing" label="Revolutionizing" default>
+                    <HeroSlide
+                      title="Revolutionizing space technology"
+                      description="SpaceX's Starship spacecraft and Super Heavy rocket is a fully reusable transportation system designed to carry both crew and cargo to Earth orbit, the Moon, Mars, and beyond."
+                      ctaLabel="LEARN MORE"
+                      align="right"
+                      backgroundImage="https://app.paper.design/file-assets/01KNVY3KDX0AF0T2KXS3R522Y3/0VKRWSSBY2KNGE6SM18JVWMSF8.jpg"
+                      gradientStyle="linear-gradient(in oklab 90deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0 / 80%) 100%)"
+                    />
+                  </VariantOption>
+                  <VariantOption id="reusability" label="Reusability">
+                    <HeroSlide
+                      title="Reusability changes everything"
+                      description="By landing and reflying rocket boosters, SpaceX has reduced the cost of reaching orbit by an order of magnitude — opening space to possibilities that were once unimaginable."
+                      ctaLabel="SEE A LANDING"
+                      align="right"
+                      backgroundImage="https://app.paper.design/file-assets/01KNVY3KDX0AF0T2KXS3R522Y3/0VKRWSSBY2KNGE6SM18JVWMSF8.jpg"
+                      gradientStyle="linear-gradient(in oklab 90deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0 / 80%) 100%)"
+                    />
+                  </VariantOption>
+                  <VariantOption id="starship-era" label="Starship Era">
+                    <HeroSlide
+                      title="Welcome to the Starship era"
+                      description="The most powerful launch system ever built. Starship is designed to carry over 100 metric tonnes to orbit, enabling missions to the Moon, Mars, and deep space."
+                      ctaLabel="MEET STARSHIP"
+                      align="right"
+                      backgroundImage="https://app.paper.design/file-assets/01KNVY3KDX0AF0T2KXS3R522Y3/0VKRWSSBY2KNGE6SM18JVWMSF8.jpg"
+                      gradientStyle="linear-gradient(in oklab 90deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0 / 80%) 100%)"
+                    />
+                  </VariantOption>
+                </VariantGroup>
                 <HeroSlide
                   title="World's leading launch service provider"
                   description="SpaceX leads the world in launches with its reliable, reusable rockets and is developing the fully and rapidly reusable rockets necessary to transform humanity's ability to access space into something as routine as air travel."
