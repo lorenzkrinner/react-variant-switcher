@@ -9,7 +9,6 @@ export function useVariant(groupId: string) {
     if (!group) {
       return {
         groupId,
-        title: undefined,
         options: [],
         activeOptionId: undefined,
         activeOption: undefined,
@@ -22,7 +21,6 @@ export function useVariant(groupId: string) {
 
     return {
       groupId: group.id,
-      title: group.title,
       options: group.options,
       activeOptionId: group.activeOptionId,
       activeOption: group.options.find((option) => option.id === group.activeOptionId),

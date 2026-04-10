@@ -5,7 +5,9 @@ export function GroupSwitcherOverlay() {
   const { groups, groupOrder, groupSwitcherOpen, previewGroupId, activeGroupId } =
     useVariantContext();
 
-  if (!groupSwitcherOpen || groupOrder.length < 2) {
+  const enabledGroupOrder = groupOrder.filter((id) => !groups[id]?.disabled);
+
+  if (!groupSwitcherOpen || enabledGroupOrder.length < 2) {
     return null;
   }
 
@@ -15,7 +17,7 @@ export function GroupSwitcherOverlay() {
       role="listbox"
       aria-label="Switch group"
     >
-      {groupOrder.map((groupId) => {
+      {enabledGroupOrder.map((groupId) => {
         const group = groups[groupId];
         if (!group) return null;
 
@@ -36,7 +38,7 @@ export function GroupSwitcherOverlay() {
                   : " text-white/60")
             }
           >
-            {group.title ?? group.name}
+            {group.name}
           </div>
         );
       })}
@@ -48,7 +50,7 @@ export function GroupSwitcherOverlay() {
   }
 
   return createPortal(
-    <div className="fixed inset-0 flex items-center justify-center z-[10000] pointer-events-none">
+    <div className="fixed inset-0 flex items-center justify-center z-10000 pointer-events-none">
       {overlay}
     </div>,
     document.body

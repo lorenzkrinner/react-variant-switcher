@@ -10,7 +10,7 @@ import {
 } from "react";
 import { loadSelectionsFromStorage, saveSelectionsToStorage } from "../state/persistence";
 import { readSelectionFromUrl, writeSelectionsToUrl } from "../state/urlSync";
-import { VariantSwitcher } from "../components/VariantSwitcher";
+import { AutoSwitcher } from "../components/VariantSwitcher";
 import { GroupSwitcherOverlay } from "../components/GroupSwitcherOverlay";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
@@ -24,7 +24,7 @@ export interface VariantOptionDefinition {
 export interface VariantGroupDefinition {
   id: string;
   name: string;
-  title?: string;
+  disabled: boolean;
   options: VariantOptionDefinition[];
   activeOptionId?: string;
 }
@@ -47,7 +47,8 @@ interface VariantContextValue {
   activeGroupId?: string;
   isSwitcherVisible: boolean;
   isDisabled: boolean;
-  registerGroup: (groupId: string, name: string, title?: string) => void;
+  hasCustomSwitcher: boolean;
+  registerGroup: (groupId: string, name: string, disabled: boolean) => void;
   unregisterGroup: (groupId: string) => void;
   registerOption: (input: RegisterOptionInput) => void;
   unregisterOption: (groupId: string, optionId: string) => void;
@@ -56,6 +57,8 @@ interface VariantContextValue {
   previousOption: (groupId: string) => void;
   setActiveGroup: (groupId: string) => void;
   setSwitcherVisible: (visible: boolean) => void;
+  registerSwitcher: () => void;
+  unregisterSwitcher: () => void;
   groupSwitcherOpen: boolean;
   previewGroupId: string | undefined;
 }
@@ -66,15 +69,13 @@ export interface VariantProviderProps {
   defaultGroupId?: string;
   showSwitcher?: boolean;
   enablePersistence?: boolean;
-  storageKey?: string;
   syncWithUrl?: boolean;
-  urlParamNames?: Record<string, string>;
   enableKeyboardShortcuts?: boolean;
 }
 
 const VariantContext = createContext<VariantContextValue | null>(null);
 
-const DEFAULT_STORAGE_KEY = "react_variant_switcher_config";
+const STORAGE_KEY = "react_variant_switcher_config";
 
 const getDefaultSwitcherVisibility = (): boolean => {
   const maybeNodeProcess = (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process;
@@ -122,12 +123,12 @@ const upsertGroup = (
   store: VariantStore,
   groupId: string,
   name: string,
-  title: string | undefined
+  disabled: boolean
 ): VariantStore => {
   const existingGroup = store.groups[groupId];
   const nextGroup: VariantGroupDefinition = existingGroup
-    ? { ...existingGroup, name, title: title ?? existingGroup.title }
-    : { id: groupId, name, title, options: [] };
+    ? { ...existingGroup, name, disabled }
+    : { id: groupId, name, disabled, options: [] };
 
   const nextGroups = {
     ...store.groups,
@@ -135,10 +136,12 @@ const upsertGroup = (
   };
   const hasGroupInOrder = store.groupOrder.includes(groupId);
   const nextGroupOrder = hasGroupInOrder ? store.groupOrder : [...store.groupOrder, groupId];
+
+  const enabledGroupIds = nextGroupOrder.filter((id) => !nextGroups[id]?.disabled);
   const nextActiveGroupId =
-    store.activeGroupId ??
-    (store.groupOrder.length === 0 ? groupId : store.groupOrder[0]) ??
-    groupId;
+    store.activeGroupId && enabledGroupIds.includes(store.activeGroupId)
+      ? store.activeGroupId
+      : enabledGroupIds[0];
 
   return {
     ...store,
@@ -166,9 +169,7 @@ export function VariantProvider({
   defaultGroupId,
   showSwitcher,
   enablePersistence = true,
-  storageKey = DEFAULT_STORAGE_KEY,
   syncWithUrl = false,
-  urlParamNames,
   enableKeyboardShortcuts = true
 }: VariantProviderProps) {
   const [store, setStore] = useState<VariantStore>({
@@ -181,26 +182,23 @@ export function VariantProvider({
   const [isSwitcherVisible, setSwitcherVisible] = useState(showSwitcher ?? getDefaultSwitcherVisibility());
   const [groupSwitcherOpen, setGroupSwitcherOpen] = useState(false);
   const [previewGroupId, setPreviewGroupId] = useState<string | undefined>(undefined);
-
-  const resolveUrlParamName = useCallback((groupName: string) => {
-    return urlParamNames?.[groupName] ?? groupName;
-  }, [urlParamNames]);
+  const [customSwitcherCount, setCustomSwitcherCount] = useState(0);
 
   const getInitialSelectionForGroup = useCallback((groupId: string, groupName: string): string | undefined => {
     if (syncWithUrl) {
-      const selectionFromUrl = readSelectionFromUrl(resolveUrlParamName(groupName));
+      const selectionFromUrl = readSelectionFromUrl(groupName);
       if (selectionFromUrl) {
         return selectionFromUrl;
       }
     }
 
     if (enablePersistence) {
-      const persistedSelections = loadSelectionsFromStorage(storageKey);
+      const persistedSelections = loadSelectionsFromStorage(STORAGE_KEY);
       return persistedSelections[groupId];
     }
 
     return undefined;
-  }, [enablePersistence, resolveUrlParamName, storageKey, syncWithUrl]);
+  }, [enablePersistence, syncWithUrl]);
 
   useEffect(() => {
     if (showSwitcher !== undefined) {
@@ -208,9 +206,9 @@ export function VariantProvider({
     }
   }, [showSwitcher]);
 
-  const registerGroup = useCallback((groupId: string, name: string, title?: string) => {
+  const registerGroup = useCallback((groupId: string, name: string, groupDisabled: boolean) => {
     setStore((currentStore) => {
-      const updatedStore = upsertGroup(currentStore, groupId, name, title);
+      const updatedStore = upsertGroup(currentStore, groupId, name, groupDisabled);
 
       if (defaultGroupId && updatedStore.groupOrder.includes(defaultGroupId)) {
         return {
@@ -233,9 +231,10 @@ export function VariantProvider({
       delete nextGroups[groupId];
 
       const nextGroupOrder = currentStore.groupOrder.filter((id) => id !== groupId);
-      const fallbackGroupId = defaultGroupId && nextGroupOrder.includes(defaultGroupId)
+      const enabledGroupIds = nextGroupOrder.filter((id) => !nextGroups[id]?.disabled);
+      const fallbackGroupId = defaultGroupId && enabledGroupIds.includes(defaultGroupId)
         ? defaultGroupId
-        : nextGroupOrder[0];
+        : enabledGroupIds[0];
 
       return {
         ...currentStore,
@@ -249,25 +248,28 @@ export function VariantProvider({
 
   const registerOption = useCallback(({ groupId, groupName, option }: RegisterOptionInput) => {
     setStore((currentStore) => {
-      const storeWithGroup = upsertGroup(currentStore, groupId, groupName, undefined);
-      const group = storeWithGroup.groups[groupId];
-      if (!group) {
+      const group = currentStore.groups[groupId];
+      const storeWithGroup = group
+        ? currentStore
+        : upsertGroup(currentStore, groupId, groupName, false);
+      const resolvedGroup = storeWithGroup.groups[groupId];
+      if (!resolvedGroup) {
         return storeWithGroup;
       }
 
       const nextOptions = sortOptionsByOrder(
-        group.options.some((candidate) => candidate.id === option.id)
-          ? group.options.map((candidate) => (candidate.id === option.id ? option : candidate))
-          : [...group.options, option]
+        resolvedGroup.options.some((candidate) => candidate.id === option.id)
+          ? resolvedGroup.options.map((candidate) => (candidate.id === option.id ? option : candidate))
+          : [...resolvedGroup.options, option]
       );
 
       const nextGroup: VariantGroupDefinition = {
-        ...group,
+        ...resolvedGroup,
         options: nextOptions,
         activeOptionId: resolveActiveOption(
           nextOptions,
-          group.activeOptionId,
-          getInitialSelectionForGroup(groupId, group.name),
+          resolvedGroup.activeOptionId,
+          getInitialSelectionForGroup(groupId, resolvedGroup.name),
           !hasUserChangedSelectionRef.current
         )
       };
@@ -404,7 +406,19 @@ export function VariantProvider({
     });
   }, []);
 
+  const registerSwitcher = useCallback(() => {
+    setCustomSwitcherCount((count) => count + 1);
+  }, []);
+
+  const unregisterSwitcher = useCallback(() => {
+    setCustomSwitcherCount((count) => count - 1);
+  }, []);
+
   useEffect(() => {
+    if (disabled) {
+      return;
+    }
+
     const selections = Object.fromEntries(
       Object.entries(store.groups)
         .map(([groupId, group]) => [groupId, group.activeOptionId] as const)
@@ -412,7 +426,7 @@ export function VariantProvider({
     );
 
     if (enablePersistence && hasUserChangedSelection) {
-      saveSelectionsToStorage(storageKey, selections);
+      saveSelectionsToStorage(STORAGE_KEY, selections);
     }
 
     if (syncWithUrl && hasUserChangedSelection) {
@@ -428,21 +442,25 @@ export function VariantProvider({
           })
           .filter((entry): entry is [string, string] => Array.isArray(entry))
       );
-      writeSelectionsToUrl(urlSelections, resolveUrlParamName);
+      writeSelectionsToUrl(urlSelections);
     }
   }, [
+    disabled,
     enablePersistence,
     hasUserChangedSelection,
-    resolveUrlParamName,
-    storageKey,
     store.groups,
     syncWithUrl
   ]);
 
+  const enabledGroupOrder = useMemo(
+    () => store.groupOrder.filter((id) => !store.groups[id]?.disabled),
+    [store.groupOrder, store.groups]
+  );
+
   useKeyboardShortcuts({
     enabled: enableKeyboardShortcuts && !disabled,
     activeGroupId: store.activeGroupId,
-    groupOrder: store.groupOrder,
+    groupOrder: enabledGroupOrder,
     previousOption,
     nextOption,
     setSwitcherVisible,
@@ -458,6 +476,7 @@ export function VariantProvider({
       activeGroupId: store.activeGroupId,
       isSwitcherVisible,
       isDisabled: disabled,
+      hasCustomSwitcher: customSwitcherCount > 0,
       registerGroup,
       unregisterGroup,
       registerOption,
@@ -467,16 +486,20 @@ export function VariantProvider({
       previousOption,
       setActiveGroup,
       setSwitcherVisible,
+      registerSwitcher,
+      unregisterSwitcher,
       groupSwitcherOpen,
       previewGroupId,
     };
   }, [
     isSwitcherVisible,
     disabled,
+    customSwitcherCount,
     nextOption,
     previousOption,
     registerGroup,
     registerOption,
+    registerSwitcher,
     setActive,
     setActiveGroup,
     store.activeGroupId,
@@ -484,6 +507,7 @@ export function VariantProvider({
     store.groups,
     unregisterGroup,
     unregisterOption,
+    unregisterSwitcher,
     groupSwitcherOpen,
     previewGroupId,
   ]);
@@ -491,7 +515,7 @@ export function VariantProvider({
   return (
     <VariantContext.Provider value={contextValue}>
       {children}
-      {!disabled && isSwitcherVisible ? <VariantSwitcher /> : null}
+      {!disabled && isSwitcherVisible ? <AutoSwitcher /> : null}
       {!disabled && <GroupSwitcherOverlay />}
     </VariantContext.Provider>
   );

@@ -12,8 +12,7 @@ export const readSelectionFromUrl = (paramName: string): string | undefined => {
 };
 
 export const writeSelectionsToUrl = (
-  selections: Record<string, string>,
-  resolveParamName: (groupId: string) => string
+  selections: Record<string, string>
 ): void => {
   if (!hasBrowserApi() || typeof history === "undefined" || typeof history.replaceState !== "function") {
     return;
@@ -21,8 +20,8 @@ export const writeSelectionsToUrl = (
 
   const params = new URLSearchParams(window.location.search);
 
-  Object.entries(selections).forEach(([groupId, optionId]) => {
-    params.set(resolveParamName(groupId), optionId);
+  Object.entries(selections).forEach(([paramName, optionId]) => {
+    params.set(paramName, optionId);
   });
 
   const nextQuery = params.toString();

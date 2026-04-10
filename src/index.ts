@@ -3,8 +3,6 @@ export { VariantGroup, type VariantGroupProps } from "./components/VariantGroup"
 export {
   VariantOption,
   type VariantOptionProps,
-  Option,
-  type OptionProps
 } from "./components/VariantOption";
-export { VariantSwitcher } from "./components/VariantSwitcher";
+export { VariantSwitcher, type VariantSwitcherProps } from "./components/VariantSwitcher";
 export { useVariant } from "./hooks/useVariant";

@@ -3,7 +3,6 @@ import { createContext, useContext } from "react";
 interface GroupContextValue {
   groupId: string;
   groupName: string;
-  groupDisabled: boolean;
 }
 
 const GroupContext = createContext<GroupContextValue | null>(null);

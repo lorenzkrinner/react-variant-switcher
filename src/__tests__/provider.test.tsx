@@ -28,7 +28,7 @@ describe("VariantProvider", () => {
 
   it("persists active selection to localStorage after user change", async () => {
     render(
-      <VariantProvider storageKey="test-key">
+      <VariantProvider>
         <VariantGroup name="hero">
           <VariantOption id="a">
             <div data-testid="option-a">Option A</div>
@@ -43,7 +43,7 @@ describe("VariantProvider", () => {
     screen.getByLabelText("Next variant").click();
 
     await waitFor(() => {
-      const storedValue = window.localStorage.getItem("test-key");
+      const storedValue = window.localStorage.getItem("react_variant_switcher_config");
       expect(storedValue).not.toBeNull();
       if (!storedValue) {
         return;
@@ -114,44 +114,44 @@ describe("VariantProvider", () => {
     expect(window.location.search).toBe("");
   });
 
-  it("renders all options when provider is disabled", () => {
+  it("renders only the default option when provider is disabled", () => {
     render(
       <VariantProvider disabled>
         <VariantGroup name="hero">
           <VariantOption id="a">
             <div data-testid="option-a">Option A</div>
           </VariantOption>
-          <VariantOption id="b">
+          <VariantOption id="b" default>
             <div data-testid="option-b">Option B</div>
           </VariantOption>
         </VariantGroup>
       </VariantProvider>
     );
 
-    expect(screen.getByTestId("option-a")).toBeInTheDocument();
     expect(screen.getByTestId("option-b")).toBeInTheDocument();
+    expect(screen.queryByTestId("option-a")).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Variant switcher" })).not.toBeInTheDocument();
   });
 
-  it("renders all options when a group is disabled", () => {
+  it("renders only the default option when a group is disabled", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero" disabled>
           <VariantOption id="a">
             <div data-testid="option-a">Option A</div>
           </VariantOption>
-          <VariantOption id="b">
+          <VariantOption id="b" default>
             <div data-testid="option-b">Option B</div>
           </VariantOption>
         </VariantGroup>
       </VariantProvider>
     );
 
-    expect(screen.getByTestId("option-a")).toBeInTheDocument();
     expect(screen.getByTestId("option-b")).toBeInTheDocument();
+    expect(screen.queryByTestId("option-a")).not.toBeInTheDocument();
   });
 
-  it("renders a disabled option even when it is not active", () => {
+  it("does not render a disabled option", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero">
@@ -166,6 +166,6 @@ describe("VariantProvider", () => {
     );
 
     expect(screen.getByTestId("option-a")).toBeInTheDocument();
-    expect(screen.getByTestId("option-b")).toBeInTheDocument();
+    expect(screen.queryByTestId("option-b")).not.toBeInTheDocument();
   });
 });

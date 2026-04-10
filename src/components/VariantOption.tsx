@@ -19,15 +19,14 @@ export function VariantOption({
   disabled = false,
   children
 }: VariantOptionProps) {
-  const { groupId, groupName, groupDisabled } = useCurrentGroup();
-  const { groups, registerOption, unregisterOption, isDisabled: providerDisabled } = useVariantContext();
+  const { groupId, groupName } = useCurrentGroup();
+  const { groups, registerOption, unregisterOption } = useVariantContext();
   const orderRef = useRef<number>(optionOrderCounter++);
-  const effectiveDisabled = providerDisabled || groupDisabled || disabled;
 
   const normalizedLabel = useMemo(() => label ?? id, [id, label]);
 
   useEffect(() => {
-    if (effectiveDisabled) {
+    if (disabled) {
       return;
     }
     registerOption({
@@ -43,7 +42,7 @@ export function VariantOption({
 
     return () => unregisterOption(groupId, id);
   }, [
-    effectiveDisabled,
+    disabled,
     groupId,
     groupName,
     id,
@@ -53,8 +52,12 @@ export function VariantOption({
     unregisterOption
   ]);
 
+  if (disabled) {
+    return null;
+  }
+
   const group = groups[groupId];
-  const isVisible = effectiveDisabled || group?.activeOptionId === id;
+  const isVisible = group?.activeOptionId === id;
 
   if (!isVisible) {
     return null;
@@ -62,6 +65,3 @@ export function VariantOption({
 
   return <>{children}</>;
 }
-
-export type OptionProps = VariantOptionProps;
-export const Option = VariantOption;

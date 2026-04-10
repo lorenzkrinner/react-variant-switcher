@@ -1,12 +1,22 @@
-import { useMemo } from "react";
+import { type CSSProperties, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useVariantContext } from "../provider/VariantProvider";
 
-export function VariantSwitcher() {
+export interface VariantSwitcherProps {
+  className?: string;
+  style?: CSSProperties;
+}
+
+function SwitcherContent({ className, style }: VariantSwitcherProps) {
   const { groups, groupOrder, activeGroupId, setActiveGroup, previousOption, nextOption } =
     useVariantContext();
 
-  const resolvedGroupId = activeGroupId ?? groupOrder[0];
+  const enabledGroupOrder = useMemo(
+    () => groupOrder.filter((id) => !groups[id]?.disabled),
+    [groupOrder, groups]
+  );
+
+  const resolvedGroupId = activeGroupId ?? enabledGroupOrder[0];
   const activeGroup = resolvedGroupId ? groups[resolvedGroupId] : undefined;
 
   const activeOptionIndex = useMemo(() => {
@@ -30,11 +40,12 @@ export function VariantSwitcher() {
 
   const switcherNode = (
     <div
-      className="inline-flex items-center gap-2.5 px-3 py-2 rounded-full border border-white/20 bg-black/80 text-white backdrop-blur-md shadow-xl font-[Inter,-apple-system,BlinkMacSystemFont,'Segoe_UI',sans-serif]"
+      className={"inline-flex items-center gap-2.5 px-3 py-2 rounded-full border border-white/20 bg-black/80 text-white backdrop-blur-md shadow-xl font-[Inter,-apple-system,BlinkMacSystemFont,'Segoe_UI',sans-serif]" + (className ? ` ${className}` : "")}
+      style={style}
       role="region"
       aria-label="Variant switcher"
     >
-      {groupOrder.length > 1 ? (
+      {enabledGroupOrder.length > 1 ? (
         <label className="inline-flex">
           <span className="sr-only">Active group</span>
           <select
@@ -45,11 +56,11 @@ export function VariantSwitcher() {
               event.target.blur();
             }}
           >
-            {groupOrder.map((groupId) => {
+            {enabledGroupOrder.map((groupId) => {
               const group = groups[groupId];
               return (
                 <option key={groupId} value={groupId}>
-                  {group?.title ?? group?.name ?? groupId}
+                  {group?.name ?? groupId}
                 </option>
               );
             })}
@@ -91,9 +102,26 @@ export function VariantSwitcher() {
   }
 
   return createPortal(
-    <div className="fixed left-1/2 bottom-5 -translate-x-1/2 z-[9999]">
+    <div className="fixed left-1/2 bottom-5 -translate-x-1/2 z-10000">
       {switcherNode}
     </div>,
     document.body
   );
+}
+
+export function VariantSwitcher({ className, style }: VariantSwitcherProps) {
+  const { registerSwitcher, unregisterSwitcher } = useVariantContext();
+
+  useEffect(() => {
+    registerSwitcher();
+    return unregisterSwitcher;
+  }, [registerSwitcher, unregisterSwitcher]);
+
+  return <SwitcherContent className={className} style={style} />;
+}
+
+export function AutoSwitcher() {
+  const { hasCustomSwitcher } = useVariantContext();
+  if (hasCustomSwitcher) return null;
+  return <SwitcherContent />;
 }

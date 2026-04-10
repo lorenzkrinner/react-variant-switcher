@@ -67,12 +67,12 @@ describe("VariantSwitcher UI", () => {
   it("cycles groups with Alt+S and confirms on Alt release", async () => {
     render(
       <VariantProvider>
-        <VariantGroup name="hero" title="Hero">
+        <VariantGroup name="Hero">
           <VariantOption id="h1" label="H1">
             <div data-testid="hero-h1">H1</div>
           </VariantOption>
         </VariantGroup>
-        <VariantGroup name="cta" title="CTA">
+        <VariantGroup name="CTA">
           <VariantOption id="c1" label="C1">
             <div data-testid="cta-c1">C1</div>
           </VariantOption>
@@ -80,7 +80,6 @@ describe("VariantSwitcher UI", () => {
       </VariantProvider>
     );
 
-    // dispatchEvent directly to rule out userEvent quirks
     const altSDown = new KeyboardEvent("keydown", {
       key: "s",
       code: "KeyS",
@@ -93,7 +92,6 @@ describe("VariantSwitcher UI", () => {
       expect(screen.getByRole("listbox", { name: "Switch group" })).toBeInTheDocument();
     });
 
-    // release Alt to confirm
     const altUp = new KeyboardEvent("keyup", {
       key: "Alt",
       code: "AltLeft",
@@ -106,12 +104,12 @@ describe("VariantSwitcher UI", () => {
     });
   });
 
-  it("appends URL param only after changing selection and supports custom param names", async () => {
+  it("appends URL param after changing selection", async () => {
     const user = userEvent.setup();
     window.history.replaceState(null, "", "/");
 
     render(
-      <VariantProvider syncWithUrl urlParamNames={{ hero: "heroVariant" }}>
+      <VariantProvider syncWithUrl>
         <VariantGroup name="hero">
           <VariantOption id="v1">
             <div data-testid="v1-variant">V1</div>
@@ -127,7 +125,7 @@ describe("VariantSwitcher UI", () => {
 
     await user.click(screen.getByLabelText("Next variant"));
     await waitFor(() => {
-      expect(window.location.search).toBe("?heroVariant=v2");
+      expect(window.location.search).toBe("?hero=v2");
     });
   });
 });
