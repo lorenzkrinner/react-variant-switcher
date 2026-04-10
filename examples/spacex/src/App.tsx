@@ -1,0 +1,73 @@
+/**
+ * from Paper
+ * https://app.paper.design/file/01KNVY3KDX0AF0T2KXS3R522Y3?node=1-0
+ * on Apr 10, 2026
+ */
+import LaunchCountdown from './components/LaunchCountdown';
+import Navbar from './components/Navbar';
+import HeroSlide from './components/HeroSlide';
+import Footer from './components/Footer';
+
+export default function App() {
+  return (
+    <div className="[font-synthesis:none] flex flex-col w-404.25 h-1195 bg-black antialiased text-xs/4">
+      <div className="basis-[0%] grow">
+        <div className="flex flex-col justify-end min-h-[880.667px] w-full">
+          <div className="relative">
+            <div className="left-0 absolute top-0 w-full" style={{ backgroundImage: 'linear-gradient(in oklab 180deg, oklab(0% 0 0 / 60%) 0%, oklab(0% 0 0 / 0%) 95%)' }}>
+              <LaunchCountdown />
+              <Navbar />
+              <div className="h-75 absolute top-0 w-full inset-x-0" style={{ backgroundImage: 'linear-gradient(in oklab 180deg, oklab(0% 0 0 / 50%) 0%, oklab(0% 0 0 / 0%) 100%)' }} />
+            </div>
+          </div>
+          <div className="" />
+          <div className="">
+            <div className="w-full">
+              <div className="">
+                <HeroSlide
+                  title="Making life multiplanetary"
+                  description="SpaceX was founded under the belief that a future where humanity is out exploring the stars is fundamentally more exciting than one where we are not."
+                  ctaLabel="EXPLORE"
+                  align="left"
+                  centered
+                />
+                <HeroSlide
+                  title="Revolutionizing space technology"
+                  description="SpaceX's Starship spacecraft and Super Heavy rocket is a fully reusable transportation system designed to carry both crew and cargo to Earth orbit, the Moon, Mars, and beyond."
+                  ctaLabel="LEARN MORE"
+                  align="right"
+                  backgroundImage="https://app.paper.design/file-assets/01KNVY3KDX0AF0T2KXS3R522Y3/0VKRWSSBY2KNGE6SM18JVWMSF8.jpg"
+                  gradientStyle="linear-gradient(in oklab 90deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0 / 80%) 100%)"
+                />
+                <HeroSlide
+                  title="World's leading launch service provider"
+                  description="SpaceX leads the world in launches with its reliable, reusable rockets and is developing the fully and rapidly reusable rockets necessary to transform humanity's ability to access space into something as routine as air travel."
+                  ctaLabel="RESERVE YOUR RIDE"
+                  align="left"
+                  gradientStyle="linear-gradient(in oklab 270deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0 / 80%) 100%)"
+                />
+                <HeroSlide
+                  title="Advancing human spaceflight"
+                  description="Since returning human spaceflight capabilities to the United States in 2020, SpaceX is helping build a new era where not just hundreds of people, but thousands and ultimately millions will be able to explore space."
+                  ctaLabel="JOIN A MISSION"
+                  align="right"
+                  backgroundImage="https://app.paper.design/file-assets/01KNVY3KDX0AF0T2KXS3R522Y3/2QH1PPWTTWE514ZR15GV1Q9TBT.jpg"
+                  gradientStyle="linear-gradient(in oklab 90deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0 / 80%) 100%)"
+                />
+                <HeroSlide
+                  title="Delivering high-speed internet from space"
+                  description="Starlink is the world's most advanced satellite constellation in low-Earth orbit, delivering reliable broadband internet capable of supporting streaming, online gaming, video calls, and more."
+                  ctaLabel="ORDER NOW"
+                  align="left"
+                  centered
+                  gradientStyle="linear-gradient(in oklab 180deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0) 100%)"
+                />
+              </div>
+            </div>
+          </div>
+          <Footer />
+        </div>
+      </div>
+    </div>
+  );
+}
