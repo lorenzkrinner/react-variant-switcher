@@ -1,14 +1,19 @@
 import { useMemo } from "react";
 import { useVariantContext } from "../provider/VariantProvider";
 
-export function useVariant(groupId: string) {
+export function useVariant(groupName: string) {
   const { groups, setActive, nextOption, previousOption, setActiveGroup } = useVariantContext();
-  const group = groups[groupId];
+
+  const group = useMemo(
+    () => Object.values(groups).find((g) => g.name === groupName),
+    [groups, groupName]
+  );
 
   return useMemo(() => {
     if (!group) {
       return {
-        groupId,
+        groupName,
+        groupId: undefined,
         options: [],
         activeOptionId: undefined,
         activeOption: undefined,
@@ -20,14 +25,15 @@ export function useVariant(groupId: string) {
     }
 
     return {
+      groupName: group.name,
       groupId: group.id,
       options: group.options,
       activeOptionId: group.activeOptionId,
       activeOption: group.options.find((option) => option.id === group.activeOptionId),
-      setActive: (optionId: string) => setActive(groupId, optionId),
-      next: () => nextOption(groupId),
-      previous: () => previousOption(groupId),
-      focus: () => setActiveGroup(groupId)
+      setActive: (optionId: string) => setActive(group.id, optionId),
+      next: () => nextOption(group.id),
+      previous: () => previousOption(group.id),
+      focus: () => setActiveGroup(group.id)
     };
-  }, [group, groupId, nextOption, previousOption, setActive, setActiveGroup]);
+  }, [group, groupName, nextOption, previousOption, setActive, setActiveGroup]);
 }

@@ -1,1 +1,213 @@
-@import "tailwindcss";
+/* ── Switcher theme (shadcn-compatible variable names, scoped to .rvs-root) ── */
+
+.rvs-root {
+  --background: rgb(24 24 27);
+  --foreground: #fff;
+  --muted: rgb(39 39 42);
+  --muted-foreground: rgb(161 161 170);
+  --accent: rgb(255 255 255 / 0.05);
+  --accent-foreground: rgb(212 212 216);
+  --border: rgb(39 39 42 / 0.8);
+  --radius: 9999px;
+  --shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-size: 0.75rem;
+  --font-size-counter: 10px;
+}
+
+.rvs-overlay {
+  --popover: rgba(30, 31, 35, 0.85);
+  --popover-foreground: #fff;
+  --popover-border: rgba(255, 255, 255, 0.15);
+  --popover-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --popover-highlight: rgba(255, 255, 255, 0.15);
+  --popover-current: rgba(255, 255, 255, 0.85);
+  --popover-dim: rgba(255, 255, 255, 0.6);
+}
+
+/* ── Root switcher ── */
+
+.rvs-root {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--background);
+  padding: 4px;
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  box-shadow: var(--shadow);
+  width: fit-content;
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+
+.rvs-portal {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+/* ── Nav buttons ── */
+
+.rvs-nav-btn {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  border: none;
+  background: transparent;
+  line-height: 1;
+  color: var(--muted-foreground);
+  padding: 0;
+  transition: background 150ms, color 150ms;
+}
+
+.rvs-nav-btn:hover {
+  background: var(--muted);
+  color: var(--accent-foreground);
+}
+
+/* ── Divider ── */
+
+.rvs-divider {
+  height: 24px;
+  width: 1px;
+  background: var(--muted);
+}
+
+.rvs-divider-left {
+  margin-left: -4px;
+  margin-right: 4px;
+}
+
+.rvs-divider-right {
+  margin-left: 4px;
+  margin-right: -4px;
+}
+
+/* ── Select wrappers ── */
+
+.rvs-select-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.rvs-select-measure {
+  visibility: hidden;
+  position: absolute;
+  white-space: pre;
+  pointer-events: none;
+  font-size: var(--font-size);
+  font-family: var(--font-sans);
+}
+
+.rvs-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: var(--radius);
+  background: var(--accent);
+  padding: 2px 26px 2px 10px;
+  font-size: var(--font-size);
+  font-family: var(--font-sans);
+  color: var(--muted-foreground);
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.rvs-select-with-prefix {
+  padding-left: 36px;
+}
+
+.rvs-select-chevron {
+  position: absolute;
+  right: 8px;
+  width: 12px;
+  height: 12px;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+/* ── Counter badge ── */
+
+.rvs-counter {
+  position: absolute;
+  left: 10px;
+  font-size: var(--font-size-counter);
+  font-family: var(--font-mono);
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+
+/* ── Single-option badge (no dropdown) ── */
+
+.rvs-badge {
+  border-radius: var(--radius);
+  background: var(--accent);
+  padding: 2px 10px;
+  font-size: var(--font-size);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  letter-spacing: normal;
+  color: var(--muted-foreground);
+}
+
+/* ── Group switcher overlay ── */
+
+.rvs-overlay-portal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.rvs-overlay {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid var(--popover-border);
+  background: var(--popover);
+  box-shadow: var(--popover-shadow);
+  min-width: 180px;
+  font-family: var(--font-sans);
+  pointer-events: auto;
+}
+
+.rvs-overlay-option {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 100ms, color 100ms;
+  color: var(--popover-dim);
+}
+
+.rvs-overlay-option[aria-selected="true"] {
+  background: var(--popover-highlight);
+  color: var(--popover-foreground);
+}
+
+.rvs-overlay-option-current {
+  color: var(--popover-current);
+}

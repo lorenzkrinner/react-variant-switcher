@@ -12,11 +12,7 @@ export function GroupSwitcherOverlay() {
   }
 
   const overlay = (
-    <div
-      className="flex flex-col gap-1 p-2 rounded-xl border border-white/15 bg-[rgba(30,31,35,0.85)] backdrop-blur-xl shadow-2xl font-[Inter,-apple-system,BlinkMacSystemFont,'Segoe_UI',sans-serif] min-w-[180px]"
-      role="listbox"
-      aria-label="Switch group"
-    >
+    <div className="rvs-overlay" role="listbox" aria-label="Switch group">
       {enabledGroupOrder.map((groupId) => {
         const group = groups[groupId];
         if (!group) return null;
@@ -24,20 +20,13 @@ export function GroupSwitcherOverlay() {
         const isPreview = groupId === previewGroupId;
         const isCurrent = groupId === activeGroupId;
 
+        const className =
+          isCurrent && !isPreview
+            ? "rvs-overlay-option rvs-overlay-option-current"
+            : "rvs-overlay-option";
+
         return (
-          <div
-            key={groupId}
-            role="option"
-            aria-selected={isPreview}
-            className={
-              "px-3.5 py-2 rounded-lg text-sm font-medium transition-[background,color] duration-100" +
-              (isPreview
-                ? " bg-white/15 text-white"
-                : isCurrent
-                  ? " text-white/85"
-                  : " text-white/60")
-            }
-          >
+          <div key={groupId} role="option" aria-selected={isPreview} className={className}>
             {group.name}
           </div>
         );
@@ -50,9 +39,7 @@ export function GroupSwitcherOverlay() {
   }
 
   return createPortal(
-    <div className="fixed inset-0 flex items-center justify-center z-10000 pointer-events-none">
-      {overlay}
-    </div>,
+    <div className="rvs-overlay-portal">{overlay}</div>,
     document.body
   );
 }

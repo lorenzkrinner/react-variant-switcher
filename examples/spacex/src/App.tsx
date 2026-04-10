@@ -8,6 +8,12 @@ import LaunchCountdown from './components/LaunchCountdown';
 import Navbar from './components/Navbar';
 import HeroSlide from './components/HeroSlide';
 import Footer from './components/Footer';
+import hero1a from './assets/spacex-1a.png';
+import hero1b from './assets/spacex-1b.png';
+import hero1c from './assets/spacex-1c.png';
+import tech2a from './assets/spacex-2a.png';
+import tech2b from './assets/spacex-2b.png';
+import tech2c from './assets/spacex-2c.png';
 
 export default function App() {
   return (
@@ -15,7 +21,7 @@ export default function App() {
       <div className="basis-[0%] grow">
         <div className="flex flex-col justify-end min-h-[880.667px] w-full">
           <div className="relative">
-            <div className="left-0 absolute top-0 w-full" style={{ backgroundImage: 'linear-gradient(in oklab 180deg, oklab(0% 0 0 / 60%) 0%, oklab(0% 0 0 / 0%) 95%)' }}>
+            <div className="left-0 absolute top-0 w-full z-10" style={{ backgroundImage: 'linear-gradient(in oklab 180deg, oklab(0% 0 0 / 60%) 0%, oklab(0% 0 0 / 0%) 95%)' }}>
               <LaunchCountdown />
               <Navbar />
               <div className="h-75 absolute top-0 w-full inset-x-0" style={{ backgroundImage: 'linear-gradient(in oklab 180deg, oklab(0% 0 0 / 50%) 0%, oklab(0% 0 0 / 0%) 100%)' }} />
@@ -33,6 +39,7 @@ export default function App() {
                       ctaLabel="EXPLORE"
                       align="left"
                       centered
+                      backgroundImage={hero1a}
                     />
                   </VariantOption>
                   <VariantOption id="mars-colony" label="Mars Colony">
@@ -42,6 +49,7 @@ export default function App() {
                       ctaLabel="SEE THE PLAN"
                       align="left"
                       centered
+                      backgroundImage={hero1b}
                     />
                   </VariantOption>
                   <VariantOption id="beyond-earth" label="Beyond Earth">
@@ -51,6 +59,7 @@ export default function App() {
                       ctaLabel="FOLLOW THE JOURNEY"
                       align="left"
                       centered
+                      backgroundImage={hero1c}
                     />
                   </VariantOption>
                 </VariantGroup>
@@ -61,7 +70,7 @@ export default function App() {
                       description="SpaceX's Starship spacecraft and Super Heavy rocket is a fully reusable transportation system designed to carry both crew and cargo to Earth orbit, the Moon, Mars, and beyond."
                       ctaLabel="LEARN MORE"
                       align="right"
-                      backgroundImage="https://app.paper.design/file-assets/01KNVY3KDX0AF0T2KXS3R522Y3/0VKRWSSBY2KNGE6SM18JVWMSF8.jpg"
+                      backgroundImage={tech2a}
                       gradientStyle="linear-gradient(in oklab 90deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0 / 80%) 100%)"
                     />
                   </VariantOption>
@@ -71,7 +80,7 @@ export default function App() {
                       description="By landing and reflying rocket boosters, SpaceX has reduced the cost of reaching orbit by an order of magnitude — opening space to possibilities that were once unimaginable."
                       ctaLabel="SEE A LANDING"
                       align="right"
-                      backgroundImage="https://app.paper.design/file-assets/01KNVY3KDX0AF0T2KXS3R522Y3/0VKRWSSBY2KNGE6SM18JVWMSF8.jpg"
+                      backgroundImage={tech2b}
                       gradientStyle="linear-gradient(in oklab 90deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0 / 80%) 100%)"
                     />
                   </VariantOption>
@@ -81,7 +90,7 @@ export default function App() {
                       description="The most powerful launch system ever built. Starship is designed to carry over 100 metric tonnes to orbit, enabling missions to the Moon, Mars, and deep space."
                       ctaLabel="MEET STARSHIP"
                       align="right"
-                      backgroundImage="https://app.paper.design/file-assets/01KNVY3KDX0AF0T2KXS3R522Y3/0VKRWSSBY2KNGE6SM18JVWMSF8.jpg"
+                      backgroundImage={tech2c}
                       gradientStyle="linear-gradient(in oklab 90deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0 / 80%) 100%)"
                     />
                   </VariantOption>

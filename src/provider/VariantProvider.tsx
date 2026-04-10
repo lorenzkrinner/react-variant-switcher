@@ -56,7 +56,7 @@ interface VariantContextValue {
   nextOption: (groupId: string) => void;
   previousOption: (groupId: string) => void;
   setActiveGroup: (groupId: string) => void;
-  setSwitcherVisible: (visible: boolean) => void;
+  setSwitcherVisible: (visible: boolean | ((current: boolean) => boolean)) => void;
   registerSwitcher: () => void;
   unregisterSwitcher: () => void;
   groupSwitcherOpen: boolean;
