@@ -14,7 +14,7 @@
 ## Installation
 
 ```bash
-pnpm install react-variant-switcher
+pnpm install react-variant-switcher -D
 ```
 
 Import the stylesheet in your app entry:
