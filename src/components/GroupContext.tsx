@@ -1,13 +1,18 @@
 import { createContext, useContext } from "react";
 
-const GroupContext = createContext<string | null>(null);
+interface GroupContextValue {
+  groupId: string;
+  groupName: string;
+}
+
+const GroupContext = createContext<GroupContextValue | null>(null);
 
 export const GroupProvider = GroupContext.Provider;
 
-export const useCurrentGroupId = (): string => {
-  const groupId = useContext(GroupContext);
-  if (!groupId) {
+export const useCurrentGroup = (): GroupContextValue => {
+  const groupValue = useContext(GroupContext);
+  if (!groupValue) {
     throw new Error("<Option /> must be rendered inside a <VariantGroup />.");
   }
-  return groupId;
+  return groupValue;
 };

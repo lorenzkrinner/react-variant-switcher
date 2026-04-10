@@ -6,9 +6,9 @@
 
 - Provider + group + option API
 - Floating switcher UI with previous/next controls
-- Keyboard shortcuts (`ArrowLeft`, `ArrowRight`, `Shift+V` to toggle switcher)
+- Keyboard shortcuts (`ArrowLeft`, `ArrowRight`, `v` to toggle switcher)
 - `localStorage` persistence
-- Optional URL query syncing (`?rvs_groupId=optionId`)
+- Optional URL query syncing (`?groupId=optionId`)
 
 ## Installation
 
@@ -29,8 +29,8 @@ import "react-variant-switcher/styles.css";
 export function App() {
   return (
     <VariantProvider syncWithUrl>
-      <VariantGroup id="quote" title="Hero quote">
-        <Option id="centered" label="Centered quote">
+      <VariantGroup name="quote" title="Hero quote">
+        <Option id="centered" label="Centered quote" default>
           <section>Centered quote version</section>
         </Option>
         <Option id="left" label="Left quote">
@@ -52,11 +52,10 @@ type VariantProviderProps = {
   defaultGroupId?: string;
   showSwitcher?: boolean;
   enablePersistence?: boolean; // default true
-  storageKey?: string; // default "react-variant-switcher:selections"
+  storageKey?: string; // default "react_variant_switcher_config"
   syncWithUrl?: boolean; // default false
-  urlParamPrefix?: string; // default "rvs_"
+  urlParamNames?: Record<string, string>; // default { [groupName]: groupName }
   enableKeyboardShortcuts?: boolean; // default true
-  keyboardToggleKey?: string; // default "v"
 };
 ```
 
@@ -64,7 +63,7 @@ type VariantProviderProps = {
 
 ```tsx
 type VariantGroupProps = {
-  id: string;
+  name: string;
   title?: string;
   children: ReactNode;
 };
@@ -76,9 +75,13 @@ type VariantGroupProps = {
 type OptionProps = {
   id: string;
   label?: string;
+  default?: boolean;
   children: ReactNode;
 };
 ```
+
+If at least one option has `default`, the first `default` option in declaration order is selected.
+If none are marked `default`, the first option is selected.
 
 ### `useVariant(groupId)`
 
@@ -89,7 +92,8 @@ Returns:
 
 ## Example
 
-A runnable Vite example is included in [`examples/basic`](examples/basic).
+A runnable Vite example is included in `[examples/basic](examples/basic)`.
+
 
 ## Development
 

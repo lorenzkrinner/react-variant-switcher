@@ -41,7 +41,7 @@ export function VariantSwitcher() {
               const group = groups[groupId];
               return (
                 <option key={groupId} value={groupId}>
-                  {group?.title ?? group?.id ?? groupId}
+                  {group?.title ?? group?.name ?? groupId}
                 </option>
               );
             })}

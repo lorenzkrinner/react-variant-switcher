@@ -11,7 +11,7 @@ describe("VariantProvider", () => {
   it("renders only the active option", () => {
     render(
       <VariantProvider>
-        <VariantGroup id="hero">
+        <VariantGroup name="hero">
           <Option id="a">
             <div data-testid="option-a">Option A</div>
           </Option>
@@ -26,12 +26,40 @@ describe("VariantProvider", () => {
     expect(screen.queryByTestId("option-b")).not.toBeInTheDocument();
   });
 
-  it("hydrates active selection from localStorage", async () => {
-    window.localStorage.setItem("test-key", JSON.stringify({ hero: "b" }));
-
+  it("persists active selection to localStorage after user change", async () => {
     render(
       <VariantProvider storageKey="test-key">
-        <VariantGroup id="hero">
+        <VariantGroup name="hero">
+          <Option id="a">
+            <div data-testid="option-a">Option A</div>
+          </Option>
+          <Option id="b">
+            <div data-testid="option-b">Option B</div>
+          </Option>
+        </VariantGroup>
+      </VariantProvider>
+    );
+
+    screen.getByLabelText("Next variant").click();
+
+    await waitFor(() => {
+      const storedValue = window.localStorage.getItem("test-key");
+      expect(storedValue).not.toBeNull();
+      if (!storedValue) {
+        return;
+      }
+
+      const parsedValue = JSON.parse(storedValue) as Record<string, string>;
+      expect(Object.values(parsedValue)).toContain("b");
+    });
+  });
+
+  it("hydrates active selection from query params when syncWithUrl is on", async () => {
+    window.history.replaceState(null, "", "/?hero=b");
+
+    render(
+      <VariantProvider syncWithUrl>
+        <VariantGroup name="hero">
           <Option id="a">
             <div data-testid="option-a">Option A</div>
           </Option>
@@ -47,12 +75,32 @@ describe("VariantProvider", () => {
     });
   });
 
-  it("hydrates active selection from query params when syncWithUrl is on", async () => {
-    window.history.replaceState(null, "", "/?rvs_hero=b");
+  it("uses option default flag before falling back to first option", () => {
+    render(
+      <VariantProvider>
+        <VariantGroup name="hero">
+          <Option id="a">
+            <div data-testid="option-a">Option A</div>
+          </Option>
+          <Option id="b" default>
+            <div data-testid="option-b">Option B</div>
+          </Option>
+          <Option id="c">
+            <div data-testid="option-c">Option C</div>
+          </Option>
+        </VariantGroup>
+      </VariantProvider>
+    );
 
+    expect(screen.getByTestId("option-b")).toBeInTheDocument();
+    expect(screen.queryByTestId("option-a")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("option-c")).not.toBeInTheDocument();
+  });
+
+  it("does not auto-populate URL params on initial render", () => {
     render(
       <VariantProvider syncWithUrl>
-        <VariantGroup id="hero">
+        <VariantGroup name="hero">
           <Option id="a">
             <div data-testid="option-a">Option A</div>
           </Option>
@@ -63,8 +111,6 @@ describe("VariantProvider", () => {
       </VariantProvider>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId("option-b")).toBeInTheDocument();
-    });
+    expect(window.location.search).toBe("");
   });
 });

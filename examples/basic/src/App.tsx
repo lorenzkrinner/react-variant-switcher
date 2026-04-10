@@ -4,10 +4,10 @@ export function App() {
   return (
     <VariantProvider syncWithUrl>
       <div className="shell">
-        <h1>Quote Variants</h1>
-        <p>Use the switcher at the bottom to compare design directions.</p>
+        <h1 className="title">Quote Variants</h1>
+        <p className="description">Use the switcher at the bottom to compare design directions.</p>
 
-        <VariantGroup id="quote" title="Quote block">
+        <VariantGroup name="quote" title="Quote block">
           <Option id="centered" label="Centered quote">
             <section className="quote quote--center">
               <blockquote>

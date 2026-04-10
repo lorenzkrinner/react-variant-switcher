@@ -1,15 +1,20 @@
 import userEvent from "@testing-library/user-event";
 import { render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { Option, VariantGroup, VariantProvider } from "../index";
 
 describe("VariantSwitcher UI", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    window.history.replaceState(null, "", "/");
+  });
+
   it("cycles options with switcher buttons", async () => {
     const user = userEvent.setup();
 
     render(
       <VariantProvider>
-        <VariantGroup id="hero">
+        <VariantGroup name="hero">
           <Option id="left" label="Left">
             <div data-testid="left-variant">Left</div>
           </Option>
@@ -34,7 +39,7 @@ describe("VariantSwitcher UI", () => {
 
     render(
       <VariantProvider>
-        <VariantGroup id="hero">
+        <VariantGroup name="hero">
           <Option id="v1">
             <div data-testid="v1-variant">V1</div>
           </Option>
@@ -48,14 +53,39 @@ describe("VariantSwitcher UI", () => {
     await user.keyboard("{ArrowRight}");
     expect(screen.getByTestId("v2-variant")).toBeInTheDocument();
 
-    await user.keyboard("{Shift>}v{/Shift}");
+    await user.keyboard("v");
     await waitFor(() => {
       expect(screen.queryByRole("region", { name: "Variant switcher" })).not.toBeInTheDocument();
     });
 
-    await user.keyboard("{Shift>}v{/Shift}");
+    await user.keyboard("v");
     await waitFor(() => {
       expect(screen.getByRole("region", { name: "Variant switcher" })).toBeInTheDocument();
+    });
+  });
+
+  it("appends URL param only after changing selection and supports custom param names", async () => {
+    const user = userEvent.setup();
+    window.history.replaceState(null, "", "/");
+
+    render(
+      <VariantProvider syncWithUrl urlParamNames={{ hero: "heroVariant" }}>
+        <VariantGroup name="hero">
+          <Option id="v1">
+            <div data-testid="v1-variant">V1</div>
+          </Option>
+          <Option id="v2">
+            <div data-testid="v2-variant">V2</div>
+          </Option>
+        </VariantGroup>
+      </VariantProvider>
+    );
+
+    expect(window.location.search).toBe("");
+
+    await user.click(screen.getByLabelText("Next variant"));
+    await waitFor(() => {
+      expect(window.location.search).toBe("?heroVariant=v2");
     });
   });
 });

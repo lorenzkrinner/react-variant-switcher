@@ -13,11 +13,10 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./styles.css": "./src/ui/styles.css"
+    "./styles.css": "./dist/index.css"
   },
   "files": [
-    "dist",
-    "src/ui/styles.css"
+    "dist"
   ],
   "sideEffects": [
     "*.css"

@@ -47,13 +47,14 @@
 }
 
 .rvs-counter {
-  font-size: 15px;
+  font-size: 14px;
   opacity: 0.9;
 }
 
 .rvs-option-name {
-  font-size: 27px;
+  font-size: 14px;
   line-height: 1.2;
+  font-weight: 500;
 }
 
 .rvs-group-select-wrapper {

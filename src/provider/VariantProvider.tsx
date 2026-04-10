@@ -4,22 +4,24 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
-  type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode
 } from "react";
 import { loadSelectionsFromStorage, saveSelectionsToStorage } from "../state/persistence";
-import { readSelectionsFromUrl, writeSelectionsToUrl } from "../state/urlSync";
+import { readSelectionFromUrl, writeSelectionsToUrl } from "../state/urlSync";
 import { VariantSwitcher } from "../ui/VariantSwitcher";
 
 export interface VariantOptionDefinition {
   id: string;
   label: string;
   order: number;
+  isDefault: boolean;
 }
 
 export interface VariantGroupDefinition {
   id: string;
+  name: string;
   title?: string;
   options: VariantOptionDefinition[];
   activeOptionId?: string;
@@ -33,6 +35,7 @@ interface VariantStore {
 
 interface RegisterOptionInput {
   groupId: string;
+  groupName: string;
   option: VariantOptionDefinition;
 }
 
@@ -41,7 +44,7 @@ interface VariantContextValue {
   groupOrder: string[];
   activeGroupId?: string;
   isSwitcherVisible: boolean;
-  registerGroup: (groupId: string, title?: string) => void;
+  registerGroup: (groupId: string, name: string, title?: string) => void;
   unregisterGroup: (groupId: string) => void;
   registerOption: (input: RegisterOptionInput) => void;
   unregisterOption: (groupId: string, optionId: string) => void;
@@ -59,16 +62,14 @@ export interface VariantProviderProps {
   enablePersistence?: boolean;
   storageKey?: string;
   syncWithUrl?: boolean;
-  urlParamPrefix?: string;
+  urlParamNames?: Record<string, string>;
   enableKeyboardShortcuts?: boolean;
-  keyboardToggleKey?: string;
 }
 
 const VariantContext = createContext<VariantContextValue | null>(null);
 
-const DEFAULT_STORAGE_KEY = "react-variant-switcher:selections";
-const DEFAULT_URL_PREFIX = "rvs_";
-const DEFAULT_KEYBOARD_TOGGLE_KEY = "v";
+const DEFAULT_STORAGE_KEY = "react_variant_switcher_config";
+const SWITCHER_TOGGLE_KEY = "v";
 
 const isInputLikeElement = (target: EventTarget | null): boolean => {
   if (!(target instanceof HTMLElement)) {
@@ -91,13 +92,31 @@ const getDefaultSwitcherVisibility = (): boolean => {
 
 const resolveActiveOption = (
   options: VariantOptionDefinition[],
-  currentActiveOptionId: string | undefined
+  currentActiveOptionId: string | undefined,
+  preferredOptionId?: string,
+  preferPreferredOverCurrent = false
 ): string | undefined => {
   if (options.length === 0) {
     return undefined;
   }
 
-  if (currentActiveOptionId && options.some((option) => option.id === currentActiveOptionId)) {
+  const hasCurrentActiveOption =
+    !!currentActiveOptionId && options.some((option) => option.id === currentActiveOptionId);
+
+  if (!preferPreferredOverCurrent && hasCurrentActiveOption) {
+    return currentActiveOptionId;
+  }
+
+  if (preferredOptionId && options.some((option) => option.id === preferredOptionId)) {
+    return preferredOptionId;
+  }
+
+  const explicitDefaultOption = options.find((option) => option.isDefault);
+  if (explicitDefaultOption) {
+    return explicitDefaultOption.id;
+  }
+
+  if (preferPreferredOverCurrent && hasCurrentActiveOption) {
     return currentActiveOptionId;
   }
 
@@ -111,12 +130,13 @@ const sortOptionsByOrder = (options: VariantOptionDefinition[]): VariantOptionDe
 const upsertGroup = (
   store: VariantStore,
   groupId: string,
+  name: string,
   title: string | undefined
 ): VariantStore => {
   const existingGroup = store.groups[groupId];
   const nextGroup: VariantGroupDefinition = existingGroup
-    ? { ...existingGroup, title: title ?? existingGroup.title }
-    : { id: groupId, title, options: [] };
+    ? { ...existingGroup, name, title: title ?? existingGroup.title }
+    : { id: groupId, name, title, options: [] };
 
   const nextGroups = {
     ...store.groups,
@@ -156,17 +176,37 @@ export function VariantProvider({
   enablePersistence = true,
   storageKey = DEFAULT_STORAGE_KEY,
   syncWithUrl = false,
-  urlParamPrefix = DEFAULT_URL_PREFIX,
-  enableKeyboardShortcuts = true,
-  keyboardToggleKey = DEFAULT_KEYBOARD_TOGGLE_KEY
+  urlParamNames,
+  enableKeyboardShortcuts = true
 }: VariantProviderProps) {
   const [store, setStore] = useState<VariantStore>({
     groups: {},
     groupOrder: [],
     activeGroupId: defaultGroupId
   });
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [hasUserChangedSelection, setHasUserChangedSelection] = useState(false);
+  const hasUserChangedSelectionRef = useRef(false);
   const [isSwitcherVisible, setSwitcherVisible] = useState(showSwitcher ?? getDefaultSwitcherVisibility());
+
+  const resolveUrlParamName = useCallback((groupName: string) => {
+    return urlParamNames?.[groupName] ?? groupName;
+  }, [urlParamNames]);
+
+  const getInitialSelectionForGroup = useCallback((groupId: string, groupName: string): string | undefined => {
+    if (syncWithUrl) {
+      const selectionFromUrl = readSelectionFromUrl(resolveUrlParamName(groupName));
+      if (selectionFromUrl) {
+        return selectionFromUrl;
+      }
+    }
+
+    if (enablePersistence) {
+      const persistedSelections = loadSelectionsFromStorage(storageKey);
+      return persistedSelections[groupId];
+    }
+
+    return undefined;
+  }, [enablePersistence, resolveUrlParamName, storageKey, syncWithUrl]);
 
   useEffect(() => {
     if (showSwitcher !== undefined) {
@@ -174,39 +214,9 @@ export function VariantProvider({
     }
   }, [showSwitcher]);
 
-  useEffect(() => {
-    const selections = {
-      ...(enablePersistence ? loadSelectionsFromStorage(storageKey) : {}),
-      ...(syncWithUrl ? readSelectionsFromUrl(urlParamPrefix) : {})
-    };
-
-    if (Object.keys(selections).length > 0) {
-      setStore((currentStore) => {
-        const nextGroups = Object.fromEntries(
-          Object.entries(currentStore.groups).map(([groupId, group]) => {
-            return [
-              groupId,
-              {
-                ...group,
-                activeOptionId: selections[groupId] ?? group.activeOptionId
-              }
-            ];
-          })
-        );
-
-        return {
-          ...currentStore,
-          groups: nextGroups
-        };
-      });
-    }
-
-    setIsHydrated(true);
-  }, [enablePersistence, storageKey, syncWithUrl, urlParamPrefix]);
-
-  const registerGroup = useCallback((groupId: string, title?: string) => {
+  const registerGroup = useCallback((groupId: string, name: string, title?: string) => {
     setStore((currentStore) => {
-      const updatedStore = upsertGroup(currentStore, groupId, title);
+      const updatedStore = upsertGroup(currentStore, groupId, name, title);
 
       if (defaultGroupId && updatedStore.groupOrder.includes(defaultGroupId)) {
         return {
@@ -243,9 +253,9 @@ export function VariantProvider({
     });
   }, [defaultGroupId]);
 
-  const registerOption = useCallback(({ groupId, option }: RegisterOptionInput) => {
+  const registerOption = useCallback(({ groupId, groupName, option }: RegisterOptionInput) => {
     setStore((currentStore) => {
-      const storeWithGroup = upsertGroup(currentStore, groupId, undefined);
+      const storeWithGroup = upsertGroup(currentStore, groupId, groupName, undefined);
       const group = storeWithGroup.groups[groupId];
       if (!group) {
         return storeWithGroup;
@@ -260,7 +270,12 @@ export function VariantProvider({
       const nextGroup: VariantGroupDefinition = {
         ...group,
         options: nextOptions,
-        activeOptionId: resolveActiveOption(nextOptions, group.activeOptionId)
+        activeOptionId: resolveActiveOption(
+          nextOptions,
+          group.activeOptionId,
+          getInitialSelectionForGroup(groupId, group.name),
+          !hasUserChangedSelectionRef.current
+        )
       };
 
       return {
@@ -271,7 +286,7 @@ export function VariantProvider({
         }
       };
     });
-  }, []);
+  }, [getInitialSelectionForGroup]);
 
   const unregisterOption = useCallback((groupId: string, optionId: string) => {
     setStore((currentStore) => {
@@ -284,7 +299,12 @@ export function VariantProvider({
       const nextGroup: VariantGroupDefinition = {
         ...group,
         options: nextOptions,
-        activeOptionId: resolveActiveOption(nextOptions, group.activeOptionId)
+        activeOptionId: resolveActiveOption(
+          nextOptions,
+          group.activeOptionId,
+          getInitialSelectionForGroup(groupId, group.name),
+          !hasUserChangedSelectionRef.current
+        )
       };
 
       return {
@@ -295,9 +315,11 @@ export function VariantProvider({
         }
       };
     });
-  }, []);
+  }, [getInitialSelectionForGroup]);
 
   const setActive = useCallback((groupId: string, optionId: string) => {
+    hasUserChangedSelectionRef.current = true;
+    setHasUserChangedSelection(true);
     setStore((currentStore) => {
       const group = currentStore.groups[groupId];
       if (!group) {
@@ -322,6 +344,8 @@ export function VariantProvider({
   }, []);
 
   const nextOption = useCallback((groupId: string) => {
+    hasUserChangedSelectionRef.current = true;
+    setHasUserChangedSelection(true);
     setStore((currentStore) => {
       const group = currentStore.groups[groupId];
       if (!group) {
@@ -347,6 +371,8 @@ export function VariantProvider({
   }, []);
 
   const previousOption = useCallback((groupId: string) => {
+    hasUserChangedSelectionRef.current = true;
+    setHasUserChangedSelection(true);
     setStore((currentStore) => {
       const group = currentStore.groups[groupId];
       if (!group) {
@@ -385,24 +411,39 @@ export function VariantProvider({
   }, []);
 
   useEffect(() => {
-    if (!isHydrated) {
-      return;
-    }
-
     const selections = Object.fromEntries(
       Object.entries(store.groups)
         .map(([groupId, group]) => [groupId, group.activeOptionId] as const)
         .filter((entry): entry is [string, string] => typeof entry[1] === "string")
     );
 
-    if (enablePersistence) {
+    if (enablePersistence && hasUserChangedSelection) {
       saveSelectionsToStorage(storageKey, selections);
     }
 
-    if (syncWithUrl) {
-      writeSelectionsToUrl(urlParamPrefix, selections);
+    if (syncWithUrl && hasUserChangedSelection) {
+      const urlSelections = Object.fromEntries(
+        Object.values(store.groups)
+          .map((group) => {
+            const activeOptionId = selections[group.id];
+            if (!activeOptionId) {
+              return undefined;
+            }
+
+            return [group.name, activeOptionId] as const;
+          })
+          .filter((entry): entry is [string, string] => Array.isArray(entry))
+      );
+      writeSelectionsToUrl(urlSelections, resolveUrlParamName);
     }
-  }, [enablePersistence, isHydrated, storageKey, store.groups, syncWithUrl, urlParamPrefix]);
+  }, [
+    enablePersistence,
+    hasUserChangedSelection,
+    resolveUrlParamName,
+    storageKey,
+    store.groups,
+    syncWithUrl
+  ]);
 
   useEffect(() => {
     if (!enableKeyboardShortcuts) {
@@ -419,7 +460,7 @@ export function VariantProvider({
         return;
       }
 
-      if (event.shiftKey && event.key.toLowerCase() === keyboardToggleKey.toLowerCase()) {
+      if (event.key.toLowerCase() === SWITCHER_TOGGLE_KEY) {
         event.preventDefault();
         setSwitcherVisible((currentValue) => !currentValue);
         return;
@@ -436,7 +477,7 @@ export function VariantProvider({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [enableKeyboardShortcuts, keyboardToggleKey, nextOption, previousOption, store.activeGroupId]);
+  }, [enableKeyboardShortcuts, nextOption, previousOption, store.activeGroupId]);
 
   const contextValue = useMemo<VariantContextValue>(() => {
     return {
@@ -483,17 +524,4 @@ export const useVariantContext = (): VariantContextValue => {
     throw new Error("react-variant-switcher components must be used inside VariantProvider.");
   }
   return context;
-};
-
-export const onVariantSwitcherKeyDown = (
-  event: ReactKeyboardEvent<HTMLDivElement>,
-  groupId: string,
-  nextOption: (id: string) => void,
-  previousOption: (id: string) => void
-) => {
-  if (event.key === "ArrowLeft") {
-    previousOption(groupId);
-  } else if (event.key === "ArrowRight") {
-    nextOption(groupId);
-  }
 };
