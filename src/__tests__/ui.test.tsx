@@ -15,10 +15,10 @@ describe("VariantSwitcher UI", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero">
-          <VariantOption id="left" label="Left">
+          <VariantOption name="left" label="Left">
             <div data-testid="left-variant">Left</div>
           </VariantOption>
-          <VariantOption id="center" label="Centered quote">
+          <VariantOption name="center" label="Centered quote">
             <div data-testid="center-variant">Centered quote</div>
           </VariantOption>
         </VariantGroup>
@@ -40,10 +40,10 @@ describe("VariantSwitcher UI", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero">
-          <VariantOption id="v1">
+          <VariantOption name="v1">
             <div data-testid="v1-variant">V1</div>
           </VariantOption>
-          <VariantOption id="v2">
+          <VariantOption name="v2">
             <div data-testid="v2-variant">V2</div>
           </VariantOption>
         </VariantGroup>
@@ -68,12 +68,12 @@ describe("VariantSwitcher UI", () => {
     render(
       <VariantProvider>
         <VariantGroup name="Hero">
-          <VariantOption id="h1" label="H1">
+          <VariantOption name="h1" label="H1">
             <div data-testid="hero-h1">H1</div>
           </VariantOption>
         </VariantGroup>
         <VariantGroup name="CTA">
-          <VariantOption id="c1" label="C1">
+          <VariantOption name="c1" label="C1">
             <div data-testid="cta-c1">C1</div>
           </VariantOption>
         </VariantGroup>
@@ -111,10 +111,10 @@ describe("VariantSwitcher UI", () => {
     render(
       <VariantProvider syncWithUrl>
         <VariantGroup name="hero">
-          <VariantOption id="v1">
+          <VariantOption name="v1">
             <div data-testid="v1-variant">V1</div>
           </VariantOption>
-          <VariantOption id="v2">
+          <VariantOption name="v2">
             <div data-testid="v2-variant">V2</div>
           </VariantOption>
         </VariantGroup>

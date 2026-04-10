@@ -32,7 +32,7 @@ export default function App() {
             <div className="w-full">
               <div className="">
                 <VariantGroup name="Hero">
-                  <VariantOption id="multiplanetary" label="Multiplanetary" default>
+                  <VariantOption name="multiplanetary" label="Multiplanetary" default>
                     <HeroSlide
                       title="Making life multiplanetary"
                       description="SpaceX was founded under the belief that a future where humanity is out exploring the stars is fundamentally more exciting than one where we are not."
@@ -42,7 +42,7 @@ export default function App() {
                       backgroundImage={hero1a}
                     />
                   </VariantOption>
-                  <VariantOption id="mars-colony" label="Mars Colony">
+                  <VariantOption name="mars-colony" label="Mars Colony">
                     <HeroSlide
                       title="Building humanity's first Mars colony"
                       description="Our mission is to establish a permanent, self-sustaining human presence on Mars — making humanity a truly interplanetary species within our lifetime."
@@ -52,7 +52,7 @@ export default function App() {
                       backgroundImage={hero1b}
                     />
                   </VariantOption>
-                  <VariantOption id="beyond-earth" label="Beyond Earth">
+                  <VariantOption name="beyond-earth" label="Beyond Earth">
                     <HeroSlide
                       title="The next giant leap starts here"
                       description="From the first orbital flights to landing on Mars, every mission brings us closer to a future among the stars. The journey beyond Earth begins now."
@@ -64,7 +64,7 @@ export default function App() {
                   </VariantOption>
                 </VariantGroup>
                 <VariantGroup name="Technology">
-                  <VariantOption id="revolutionizing" label="Revolutionizing" default>
+                  <VariantOption name="revolutionizing" label="Revolutionizing" default>
                     <HeroSlide
                       title="Revolutionizing space technology"
                       description="SpaceX's Starship spacecraft and Super Heavy rocket is a fully reusable transportation system designed to carry both crew and cargo to Earth orbit, the Moon, Mars, and beyond."
@@ -74,7 +74,7 @@ export default function App() {
                       gradientStyle="linear-gradient(in oklab 90deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0 / 80%) 100%)"
                     />
                   </VariantOption>
-                  <VariantOption id="reusability" label="Reusability">
+                  <VariantOption name="reusability" label="Reusability">
                     <HeroSlide
                       title="Reusability changes everything"
                       description="By landing and reflying rocket boosters, SpaceX has reduced the cost of reaching orbit by an order of magnitude — opening space to possibilities that were once unimaginable."
@@ -84,7 +84,7 @@ export default function App() {
                       gradientStyle="linear-gradient(in oklab 90deg, oklab(0% 0 0 / 0%) 50%, oklab(0% 0 0 / 80%) 100%)"
                     />
                   </VariantOption>
-                  <VariantOption id="starship-era" label="Starship Era">
+                  <VariantOption name="starship-era" label="Starship Era">
                     <HeroSlide
                       title="Welcome to the Starship era"
                       description="The most powerful launch system ever built. Starship is designed to carry over 100 metric tonnes to orbit, enabling missions to the Moon, Mars, and deep space."

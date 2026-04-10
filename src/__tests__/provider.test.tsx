@@ -12,10 +12,10 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero">
-          <VariantOption id="a">
+          <VariantOption name="a">
             <div data-testid="option-a">Option A</div>
           </VariantOption>
-          <VariantOption id="b">
+          <VariantOption name="b">
             <div data-testid="option-b">Option B</div>
           </VariantOption>
         </VariantGroup>
@@ -30,10 +30,10 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero">
-          <VariantOption id="a">
+          <VariantOption name="a">
             <div data-testid="option-a">Option A</div>
           </VariantOption>
-          <VariantOption id="b">
+          <VariantOption name="b">
             <div data-testid="option-b">Option B</div>
           </VariantOption>
         </VariantGroup>
@@ -60,10 +60,10 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider syncWithUrl>
         <VariantGroup name="hero">
-          <VariantOption id="a">
+          <VariantOption name="a">
             <div data-testid="option-a">Option A</div>
           </VariantOption>
-          <VariantOption id="b">
+          <VariantOption name="b">
             <div data-testid="option-b">Option B</div>
           </VariantOption>
         </VariantGroup>
@@ -79,13 +79,13 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero">
-          <VariantOption id="a">
+          <VariantOption name="a">
             <div data-testid="option-a">Option A</div>
           </VariantOption>
-          <VariantOption id="b" default>
+          <VariantOption name="b" default>
             <div data-testid="option-b">Option B</div>
           </VariantOption>
-          <VariantOption id="c">
+          <VariantOption name="c">
             <div data-testid="option-c">Option C</div>
           </VariantOption>
         </VariantGroup>
@@ -101,10 +101,10 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider syncWithUrl>
         <VariantGroup name="hero">
-          <VariantOption id="a">
+          <VariantOption name="a">
             <div data-testid="option-a">Option A</div>
           </VariantOption>
-          <VariantOption id="b">
+          <VariantOption name="b">
             <div data-testid="option-b">Option B</div>
           </VariantOption>
         </VariantGroup>
@@ -118,10 +118,10 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider disabled>
         <VariantGroup name="hero">
-          <VariantOption id="a">
+          <VariantOption name="a">
             <div data-testid="option-a">Option A</div>
           </VariantOption>
-          <VariantOption id="b" default>
+          <VariantOption name="b" default>
             <div data-testid="option-b">Option B</div>
           </VariantOption>
         </VariantGroup>
@@ -137,10 +137,10 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero" disabled>
-          <VariantOption id="a">
+          <VariantOption name="a">
             <div data-testid="option-a">Option A</div>
           </VariantOption>
-          <VariantOption id="b" default>
+          <VariantOption name="b" default>
             <div data-testid="option-b">Option B</div>
           </VariantOption>
         </VariantGroup>
@@ -155,10 +155,10 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero">
-          <VariantOption id="a">
+          <VariantOption name="a">
             <div data-testid="option-a">Option A</div>
           </VariantOption>
-          <VariantOption id="b" disabled>
+          <VariantOption name="b" disabled>
             <div data-testid="option-b">Option B</div>
           </VariantOption>
         </VariantGroup>

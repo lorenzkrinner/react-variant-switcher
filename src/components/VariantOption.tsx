@@ -5,7 +5,7 @@ import { useVariantContext } from "../provider/VariantProvider";
 let optionOrderCounter = 0;
 
 export interface VariantOptionProps {
-  id: string;
+  name: string;
   label?: string;
   default?: boolean;
   disabled?: boolean;
@@ -13,7 +13,7 @@ export interface VariantOptionProps {
 }
 
 export function VariantOption({
-  id,
+  name,
   label,
   default: isDefault = false,
   disabled = false,
@@ -23,7 +23,7 @@ export function VariantOption({
   const { groups, registerOption, unregisterOption } = useVariantContext();
   const orderRef = useRef<number>(optionOrderCounter++);
 
-  const normalizedLabel = useMemo(() => label ?? id, [id, label]);
+  const normalizedLabel = useMemo(() => label ?? name, [name, label]);
 
   useEffect(() => {
     if (disabled) {
@@ -33,19 +33,19 @@ export function VariantOption({
       groupId,
       groupName,
       option: {
-        id,
+        name,
         label: normalizedLabel,
         order: orderRef.current,
         isDefault
       }
     });
 
-    return () => unregisterOption(groupId, id);
+    return () => unregisterOption(groupId, name);
   }, [
     disabled,
     groupId,
     groupName,
-    id,
+    name,
     isDefault,
     normalizedLabel,
     registerOption,
@@ -57,7 +57,7 @@ export function VariantOption({
   }
 
   const group = groups[groupId];
-  const isVisible = group?.activeOptionId === id;
+  const isVisible = group?.activeOptionName === name;
 
   if (!isVisible) {
     return null;

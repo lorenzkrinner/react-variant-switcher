@@ -36,10 +36,10 @@ export function App() {
   return (
     <VariantProvider syncWithUrl>
       <VariantGroup name="hero">
-        <VariantOption id="centered" label="Centered quote" default>
+        <VariantOption name="centered" label="Centered quote" default>
           <section>Centered quote version</section>
         </VariantOption>
-        <VariantOption id="left" label="Left quote">
+        <VariantOption name="left" label="Left quote">
           <section>Left aligned version</section>
         </VariantOption>
       </VariantGroup>
@@ -58,11 +58,21 @@ type VariantProviderProps = {
   disabled?: boolean;
   defaultGroupId?: string;
   showSwitcher?: boolean;
-  enablePersistence?: boolean; // default true
-  syncWithUrl?: boolean; // default false
-  enableKeyboardShortcuts?: boolean; // default true
+  disablePersistence?: boolean;
+  syncWithUrl?: boolean;
+  disableKeyboardShortcuts?: boolean;
 };
 ```
+
+| Prop | Default | Description |
+|------|---------|-------------|
+| `children` | — | Your app content. Place `VariantGroup` trees anywhere inside. |
+| `disabled` | `false` | Disables the entire switcher. All groups render only their default/active option and the switcher UI is hidden. Useful for production builds. |
+| `defaultGroupId` | — | The internal ID of the group that should be focused in the switcher on first render. |
+| `showSwitcher` | `true` in dev, `false` in prod | Overrides switcher visibility. Pass `false` to always hide it, `true` to always show it regardless of environment. |
+| `disablePersistence` | `false` | Disables localStorage persistence. By default, active selections are saved and restored on reload. |
+| `syncWithUrl` | `false` | Syncs active selections to URL query params (e.g. `?hero=centered`). Useful for sharing specific variants via link. |
+| `disableKeyboardShortcuts` | `false` | Disables all keyboard shortcuts (`Alt+Arrow`, `Cmd+H`, `Alt+S`). |
 
 ### `VariantGroup`
 
@@ -74,11 +84,17 @@ type VariantGroupProps = {
 };
 ```
 
+| Prop | Default | Description |
+|------|---------|-------------|
+| `name` | — | Unique name for this group. Used as the URL param key when `syncWithUrl` is on and as the argument to `useVariant(name)`. |
+| `disabled` | `false` | Renders only the default/active option in this group. The group is hidden from the switcher UI. |
+| `children` | — | `VariantOption` elements. |
+
 ### `VariantOption`
 
 ```tsx
 type VariantOptionProps = {
-  id: string;
+  name: string;
   label?: string;
   default?: boolean;
   disabled?: boolean;
@@ -86,8 +102,13 @@ type VariantOptionProps = {
 };
 ```
 
-If at least one option has `default`, the first `default` option in declaration order is selected.
-If none are marked `default`, the first option is selected.
+| Prop | Default | Description |
+|------|---------|-------------|
+| `name` | — | Unique identifier for this option within its group. Used as the URL param value when `syncWithUrl` is on. |
+| `label` | same as `name` | Display label shown in the switcher dropdown. Falls back to `name` if omitted. |
+| `default` | `false` | Marks this option as the default selection. If multiple options have `default`, the first one in declaration order wins. If no option has `default`, the first option is selected. |
+| `disabled` | `false` | Excludes this option from registration entirely. It won't appear in the switcher and its children won't render. |
+| `children` | — | Content rendered when this option is active. |
 
 ### Disabled behavior
 
@@ -101,8 +122,8 @@ Pass the same `name` string you used on `<VariantGroup name="...">`.
 
 Returns:
 
-- `groupName`, `groupId`, `options`, `activeOptionId`, `activeOption`
-- actions: `setActive(optionId)`, `next()`, `previous()`, `focus()`
+- `groupName`, `groupId`, `options`, `activeOptionName`, `activeOption`
+- actions: `setActive(optionName)`, `next()`, `previous()`, `focus()`
 
 ### `VariantSwitcher`
 

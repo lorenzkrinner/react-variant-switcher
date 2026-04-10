@@ -22,15 +22,15 @@ function SwitcherContent({ className, style }: VariantSwitcherProps) {
   const activeGroup = resolvedGroupId ? groups[resolvedGroupId] : undefined;
 
   const activeOptionIndex = useMemo(() => {
-    if (!activeGroup || !activeGroup.activeOptionId) return 0;
-    const index = activeGroup.options.findIndex((o) => o.id === activeGroup.activeOptionId);
+    if (!activeGroup || !activeGroup.activeOptionName) return 0;
+    const index = activeGroup.options.findIndex((o) => o.name === activeGroup.activeOptionName);
     return index >= 0 ? index + 1 : 0;
   }, [activeGroup]);
 
   if (!activeGroup || activeGroup.options.length === 0) return null;
 
   const activeOption =
-    activeGroup.options.find((o) => o.id === activeGroup.activeOptionId) ?? activeGroup.options[0];
+    activeGroup.options.find((o) => o.name === activeGroup.activeOptionName) ?? activeGroup.options[0];
   if (!activeOption) return null;
   const optionsCount = activeGroup.options.length;
 
@@ -51,8 +51,8 @@ function SwitcherContent({ className, style }: VariantSwitcherProps) {
 
       {enabledGroupOrder.length > 1 ? (
         <AutoWidthSelect
+          displayText={activeGroup.name}
           value={activeGroup.id}
-          displayText={activeGroup.name ?? activeGroup.id}
           onChange={setActiveGroup}
         >
           {enabledGroupOrder.map((groupId) => {
@@ -68,8 +68,8 @@ function SwitcherContent({ className, style }: VariantSwitcherProps) {
 
       {activeGroup.options.length > 1 ? (
         <AutoWidthSelect
-          value={activeOption.id}
           displayText={activeOption.label}
+          value={activeOption.name}
           onChange={(val) => setActive(activeGroup.id, val)}
           hasPrefix
           prefix={
@@ -79,7 +79,7 @@ function SwitcherContent({ className, style }: VariantSwitcherProps) {
           }
         >
           {activeGroup.options.map((option) => (
-            <option key={option.id} value={option.id}>
+            <option key={option.name} value={option.name}>
               {option.label}
             </option>
           ))}

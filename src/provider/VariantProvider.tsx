@@ -15,7 +15,7 @@ import { GroupSwitcherOverlay } from "../components/GroupSwitcherOverlay";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
 export interface VariantOptionDefinition {
-  id: string;
+  name: string;
   label: string;
   order: number;
   isDefault: boolean;
@@ -26,7 +26,7 @@ export interface VariantGroupDefinition {
   name: string;
   disabled: boolean;
   options: VariantOptionDefinition[];
-  activeOptionId?: string;
+  activeOptionName?: string;
 }
 
 interface VariantStore {
@@ -51,8 +51,8 @@ interface VariantContextValue {
   registerGroup: (groupId: string, name: string, disabled: boolean) => void;
   unregisterGroup: (groupId: string) => void;
   registerOption: (input: RegisterOptionInput) => void;
-  unregisterOption: (groupId: string, optionId: string) => void;
-  setActive: (groupId: string, optionId: string) => void;
+  unregisterOption: (groupId: string, optionName: string) => void;
+  setActive: (groupId: string, optionName: string) => void;
   nextOption: (groupId: string) => void;
   previousOption: (groupId: string) => void;
   setActiveGroup: (groupId: string) => void;
@@ -68,9 +68,9 @@ export interface VariantProviderProps {
   disabled?: boolean;
   defaultGroupId?: string;
   showSwitcher?: boolean;
-  enablePersistence?: boolean;
+  disablePersistence?: boolean;
   syncWithUrl?: boolean;
-  enableKeyboardShortcuts?: boolean;
+  disableKeyboardShortcuts?: boolean;
 }
 
 const VariantContext = createContext<VariantContextValue | null>(null);
@@ -84,8 +84,8 @@ const getDefaultSwitcherVisibility = (): boolean => {
 
 const resolveActiveOption = (
   options: VariantOptionDefinition[],
-  currentActiveOptionId: string | undefined,
-  preferredOptionId?: string,
+  currentActiveOptionName: string | undefined,
+  preferredOptionName?: string,
   preferPreferredOverCurrent = false
 ): string | undefined => {
   if (options.length === 0) {
@@ -93,26 +93,26 @@ const resolveActiveOption = (
   }
 
   const hasCurrentActiveOption =
-    !!currentActiveOptionId && options.some((option) => option.id === currentActiveOptionId);
+    !!currentActiveOptionName && options.some((option) => option.name === currentActiveOptionName);
 
   if (!preferPreferredOverCurrent && hasCurrentActiveOption) {
-    return currentActiveOptionId;
+    return currentActiveOptionName;
   }
 
-  if (preferredOptionId && options.some((option) => option.id === preferredOptionId)) {
-    return preferredOptionId;
+  if (preferredOptionName && options.some((option) => option.name === preferredOptionName)) {
+    return preferredOptionName;
   }
 
   const explicitDefaultOption = options.find((option) => option.isDefault);
   if (explicitDefaultOption) {
-    return explicitDefaultOption.id;
+    return explicitDefaultOption.name;
   }
 
   if (preferPreferredOverCurrent && hasCurrentActiveOption) {
-    return currentActiveOptionId;
+    return currentActiveOptionName;
   }
 
-  return options[0]?.id;
+  return options[0]?.name;
 };
 
 const sortOptionsByOrder = (options: VariantOptionDefinition[]): VariantOptionDefinition[] => {
@@ -154,13 +154,13 @@ const upsertGroup = (
 const cycleOption = (group: VariantGroupDefinition, direction: 1 | -1): string | undefined => {
   const optionCount = group.options.length;
   if (optionCount === 0) {
-    return group.activeOptionId;
+    return group.activeOptionName;
   }
 
-  const currentIndex = group.options.findIndex((option) => option.id === group.activeOptionId);
+  const currentIndex = group.options.findIndex((option) => option.name === group.activeOptionName);
   const safeIndex = currentIndex >= 0 ? currentIndex : 0;
   const nextIndex = (safeIndex + direction + optionCount) % optionCount;
-  return group.options[nextIndex]?.id;
+  return group.options[nextIndex]?.name;
 };
 
 export function VariantProvider({
@@ -168,9 +168,9 @@ export function VariantProvider({
   disabled = false,
   defaultGroupId,
   showSwitcher,
-  enablePersistence = true,
+  disablePersistence = false,
   syncWithUrl = false,
-  enableKeyboardShortcuts = true
+  disableKeyboardShortcuts = false
 }: VariantProviderProps) {
   const [store, setStore] = useState<VariantStore>({
     groups: {},
@@ -192,13 +192,13 @@ export function VariantProvider({
       }
     }
 
-    if (enablePersistence) {
+    if (!disablePersistence) {
       const persistedSelections = loadSelectionsFromStorage(STORAGE_KEY);
       return persistedSelections[groupId];
     }
 
     return undefined;
-  }, [enablePersistence, syncWithUrl]);
+  }, [disablePersistence, syncWithUrl]);
 
   useEffect(() => {
     if (showSwitcher !== undefined) {
@@ -258,17 +258,17 @@ export function VariantProvider({
       }
 
       const nextOptions = sortOptionsByOrder(
-        resolvedGroup.options.some((candidate) => candidate.id === option.id)
-          ? resolvedGroup.options.map((candidate) => (candidate.id === option.id ? option : candidate))
+        resolvedGroup.options.some((candidate) => candidate.name === option.name)
+          ? resolvedGroup.options.map((candidate) => (candidate.name === option.name ? option : candidate))
           : [...resolvedGroup.options, option]
       );
 
       const nextGroup: VariantGroupDefinition = {
         ...resolvedGroup,
         options: nextOptions,
-        activeOptionId: resolveActiveOption(
+        activeOptionName: resolveActiveOption(
           nextOptions,
-          resolvedGroup.activeOptionId,
+          resolvedGroup.activeOptionName,
           getInitialSelectionForGroup(groupId, resolvedGroup.name),
           !hasUserChangedSelectionRef.current
         )
@@ -284,20 +284,20 @@ export function VariantProvider({
     });
   }, [getInitialSelectionForGroup]);
 
-  const unregisterOption = useCallback((groupId: string, optionId: string) => {
+  const unregisterOption = useCallback((groupId: string, optionName: string) => {
     setStore((currentStore) => {
       const group = currentStore.groups[groupId];
       if (!group) {
         return currentStore;
       }
 
-      const nextOptions = group.options.filter((option) => option.id !== optionId);
+      const nextOptions = group.options.filter((option) => option.name !== optionName);
       const nextGroup: VariantGroupDefinition = {
         ...group,
         options: nextOptions,
-        activeOptionId: resolveActiveOption(
+        activeOptionName: resolveActiveOption(
           nextOptions,
-          group.activeOptionId,
+          group.activeOptionName,
           getInitialSelectionForGroup(groupId, group.name),
           !hasUserChangedSelectionRef.current
         )
@@ -313,7 +313,7 @@ export function VariantProvider({
     });
   }, [getInitialSelectionForGroup]);
 
-  const setActive = useCallback((groupId: string, optionId: string) => {
+  const setActive = useCallback((groupId: string, optionName: string) => {
     hasUserChangedSelectionRef.current = true;
     setHasUserChangedSelection(true);
     setStore((currentStore) => {
@@ -322,7 +322,7 @@ export function VariantProvider({
         return currentStore;
       }
 
-      if (!group.options.some((option) => option.id === optionId)) {
+      if (!group.options.some((option) => option.name === optionName)) {
         return currentStore;
       }
 
@@ -332,7 +332,7 @@ export function VariantProvider({
           ...currentStore.groups,
           [groupId]: {
             ...group,
-            activeOptionId: optionId
+            activeOptionName: optionName
           }
         }
       };
@@ -348,8 +348,8 @@ export function VariantProvider({
         return currentStore;
       }
 
-      const nextOptionId = cycleOption(group, 1);
-      if (!nextOptionId || nextOptionId === group.activeOptionId) {
+      const nextOptionName = cycleOption(group, 1);
+      if (!nextOptionName || nextOptionName === group.activeOptionName) {
         return currentStore;
       }
 
@@ -359,7 +359,7 @@ export function VariantProvider({
           ...currentStore.groups,
           [groupId]: {
             ...group,
-            activeOptionId: nextOptionId
+            activeOptionName: nextOptionName
           }
         }
       };
@@ -375,8 +375,8 @@ export function VariantProvider({
         return currentStore;
       }
 
-      const nextOptionId = cycleOption(group, -1);
-      if (!nextOptionId || nextOptionId === group.activeOptionId) {
+      const nextOptionName = cycleOption(group, -1);
+      if (!nextOptionName || nextOptionName === group.activeOptionName) {
         return currentStore;
       }
 
@@ -386,7 +386,7 @@ export function VariantProvider({
           ...currentStore.groups,
           [groupId]: {
             ...group,
-            activeOptionId: nextOptionId
+            activeOptionName: nextOptionName
           }
         }
       };
@@ -421,11 +421,11 @@ export function VariantProvider({
 
     const selections = Object.fromEntries(
       Object.entries(store.groups)
-        .map(([groupId, group]) => [groupId, group.activeOptionId] as const)
+        .map(([groupId, group]) => [groupId, group.activeOptionName] as const)
         .filter((entry): entry is [string, string] => typeof entry[1] === "string")
     );
 
-    if (enablePersistence && hasUserChangedSelection) {
+    if (!disablePersistence && hasUserChangedSelection) {
       saveSelectionsToStorage(STORAGE_KEY, selections);
     }
 
@@ -433,12 +433,12 @@ export function VariantProvider({
       const urlSelections = Object.fromEntries(
         Object.values(store.groups)
           .map((group) => {
-            const activeOptionId = selections[group.id];
-            if (!activeOptionId) {
+            const activeOptionName = selections[group.id];
+            if (!activeOptionName) {
               return undefined;
             }
 
-            return [group.name, activeOptionId] as const;
+            return [group.name, activeOptionName] as const;
           })
           .filter((entry): entry is [string, string] => Array.isArray(entry))
       );
@@ -446,7 +446,7 @@ export function VariantProvider({
     }
   }, [
     disabled,
-    enablePersistence,
+    disablePersistence,
     hasUserChangedSelection,
     store.groups,
     syncWithUrl
@@ -458,7 +458,7 @@ export function VariantProvider({
   );
 
   useKeyboardShortcuts({
-    enabled: enableKeyboardShortcuts && !disabled,
+    enabled: !disableKeyboardShortcuts && !disabled,
     activeGroupId: store.activeGroupId,
     groupOrder: enabledGroupOrder,
     previousOption,
