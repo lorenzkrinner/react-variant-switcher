@@ -11,6 +11,8 @@ import {
 import { loadSelectionsFromStorage, saveSelectionsToStorage } from "../state/persistence";
 import { readSelectionFromUrl, writeSelectionsToUrl } from "../state/urlSync";
 import { VariantSwitcher } from "../components/VariantSwitcher";
+import { GroupSwitcherOverlay } from "../components/GroupSwitcherOverlay";
+import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 
 export interface VariantOptionDefinition {
   id: string;
@@ -54,6 +56,8 @@ interface VariantContextValue {
   previousOption: (groupId: string) => void;
   setActiveGroup: (groupId: string) => void;
   setSwitcherVisible: (visible: boolean) => void;
+  groupSwitcherOpen: boolean;
+  previewGroupId: string | undefined;
 }
 
 export interface VariantProviderProps {
@@ -71,21 +75,6 @@ export interface VariantProviderProps {
 const VariantContext = createContext<VariantContextValue | null>(null);
 
 const DEFAULT_STORAGE_KEY = "react_variant_switcher_config";
-const SWITCHER_TOGGLE_KEY = "v";
-
-const isInputLikeElement = (target: EventTarget | null): boolean => {
-  if (!(target instanceof HTMLElement)) {
-    return false;
-  }
-
-  const tagName = target.tagName.toLowerCase();
-  return (
-    tagName === "input" ||
-    tagName === "textarea" ||
-    tagName === "select" ||
-    target.isContentEditable
-  );
-};
 
 const getDefaultSwitcherVisibility = (): boolean => {
   const maybeNodeProcess = (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process;
@@ -190,6 +179,8 @@ export function VariantProvider({
   const [hasUserChangedSelection, setHasUserChangedSelection] = useState(false);
   const hasUserChangedSelectionRef = useRef(false);
   const [isSwitcherVisible, setSwitcherVisible] = useState(showSwitcher ?? getDefaultSwitcherVisibility());
+  const [groupSwitcherOpen, setGroupSwitcherOpen] = useState(false);
+  const [previewGroupId, setPreviewGroupId] = useState<string | undefined>(undefined);
 
   const resolveUrlParamName = useCallback((groupName: string) => {
     return urlParamNames?.[groupName] ?? groupName;
@@ -448,39 +439,17 @@ export function VariantProvider({
     syncWithUrl
   ]);
 
-  useEffect(() => {
-    if (!enableKeyboardShortcuts || disabled) {
-      return;
-    }
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (isInputLikeElement(event.target)) {
-        return;
-      }
-
-      const activeGroupId = store.activeGroupId;
-      if (!activeGroupId) {
-        return;
-      }
-
-      if (event.key.toLowerCase() === SWITCHER_TOGGLE_KEY) {
-        event.preventDefault();
-        setSwitcherVisible((currentValue) => !currentValue);
-        return;
-      }
-
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        previousOption(activeGroupId);
-      } else if (event.key === "ArrowRight") {
-        event.preventDefault();
-        nextOption(activeGroupId);
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [disabled, enableKeyboardShortcuts, nextOption, previousOption, store.activeGroupId]);
+  useKeyboardShortcuts({
+    enabled: enableKeyboardShortcuts && !disabled,
+    activeGroupId: store.activeGroupId,
+    groupOrder: store.groupOrder,
+    previousOption,
+    nextOption,
+    setSwitcherVisible,
+    setActiveGroup,
+    setGroupSwitcherOpen,
+    setPreviewGroupId,
+  });
 
   const contextValue = useMemo<VariantContextValue>(() => {
     return {
@@ -497,7 +466,9 @@ export function VariantProvider({
       nextOption,
       previousOption,
       setActiveGroup,
-      setSwitcherVisible
+      setSwitcherVisible,
+      groupSwitcherOpen,
+      previewGroupId,
     };
   }, [
     isSwitcherVisible,
@@ -512,13 +483,16 @@ export function VariantProvider({
     store.groupOrder,
     store.groups,
     unregisterGroup,
-    unregisterOption
+    unregisterOption,
+    groupSwitcherOpen,
+    previewGroupId,
   ]);
 
   return (
     <VariantContext.Provider value={contextValue}>
       {children}
       {!disabled && isSwitcherVisible ? <VariantSwitcher /> : null}
+      {!disabled && <GroupSwitcherOverlay />}
     </VariantContext.Provider>
   );
 }

@@ -50,17 +50,59 @@ describe("VariantSwitcher UI", () => {
       </VariantProvider>
     );
 
-    await user.keyboard("{ArrowRight}");
+    await user.keyboard("{Alt>}{ArrowRight}{/Alt}");
     expect(screen.getByTestId("v2-variant")).toBeInTheDocument();
 
-    await user.keyboard("v");
+    await user.keyboard("{Meta>}h{/Meta}");
     await waitFor(() => {
       expect(screen.queryByRole("region", { name: "Variant switcher" })).not.toBeInTheDocument();
     });
 
-    await user.keyboard("v");
+    await user.keyboard("{Meta>}h{/Meta}");
     await waitFor(() => {
       expect(screen.getByRole("region", { name: "Variant switcher" })).toBeInTheDocument();
+    });
+  });
+
+  it("cycles groups with Alt+S and confirms on Alt release", async () => {
+    render(
+      <VariantProvider>
+        <VariantGroup name="hero" title="Hero">
+          <VariantOption id="h1" label="H1">
+            <div data-testid="hero-h1">H1</div>
+          </VariantOption>
+        </VariantGroup>
+        <VariantGroup name="cta" title="CTA">
+          <VariantOption id="c1" label="C1">
+            <div data-testid="cta-c1">C1</div>
+          </VariantOption>
+        </VariantGroup>
+      </VariantProvider>
+    );
+
+    // dispatchEvent directly to rule out userEvent quirks
+    const altSDown = new KeyboardEvent("keydown", {
+      key: "s",
+      code: "KeyS",
+      altKey: true,
+      bubbles: true,
+    });
+    window.dispatchEvent(altSDown);
+
+    await waitFor(() => {
+      expect(screen.getByRole("listbox", { name: "Switch group" })).toBeInTheDocument();
+    });
+
+    // release Alt to confirm
+    const altUp = new KeyboardEvent("keyup", {
+      key: "Alt",
+      code: "AltLeft",
+      bubbles: true,
+    });
+    window.dispatchEvent(altUp);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox", { name: "Switch group" })).not.toBeInTheDocument();
     });
   });
 

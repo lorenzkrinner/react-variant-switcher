@@ -1,69 +1,6 @@
-import { useMemo, type CSSProperties } from "react";
+import { useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useVariantContext } from "../provider/VariantProvider";
-
-const FALLBACK_FIXED_STYLE: CSSProperties = {
-  position: "fixed",
-  left: "50%",
-  bottom: "20px",
-  transform: "translateX(-50%)",
-  zIndex: 9999
-};
-
-const FALLBACK_SWITCHER_STYLE: CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "10px",
-  padding: "8px 12px",
-  borderRadius: "9999px",
-  border: "1px solid rgba(255, 255, 255, 0.2)",
-  background: "rgba(30, 31, 35, 0.65)",
-  color: "#ffffff",
-  backdropFilter: "blur(16px)",
-  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.32)",
-  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-};
-
-const FALLBACK_BUTTON_STYLE: CSSProperties = {
-  appearance: "none",
-  border: 0,
-  borderRadius: "9999px",
-  width: "24px",
-  height: "24px",
-  cursor: "pointer",
-  color: "#f6f6f6",
-  background: "transparent",
-  fontSize: "13px",
-  lineHeight: 1
-};
-
-const FALLBACK_LABEL_STYLE: CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "12px",
-  whiteSpace: "nowrap"
-};
-
-const FALLBACK_COUNTER_STYLE: CSSProperties = {
-  fontSize: "14px",
-  opacity: 0.9
-};
-
-const FALLBACK_OPTION_NAME_STYLE: CSSProperties = {
-  fontSize: "14px",
-  lineHeight: 1.2,
-  fontWeight: 500
-};
-
-const FALLBACK_SELECT_STYLE: CSSProperties = {
-  appearance: "none",
-  border: "1px solid rgba(255, 255, 255, 0.2)",
-  borderRadius: "9999px",
-  background: "rgba(255, 255, 255, 0.06)",
-  color: "#fff",
-  padding: "3px 10px",
-  fontSize: "12px"
-};
 
 export function VariantSwitcher() {
   const { groups, groupOrder, activeGroupId, setActiveGroup, previousOption, nextOption } =
@@ -92,15 +29,21 @@ export function VariantSwitcher() {
   const optionsCount = activeGroup.options.length;
 
   const switcherNode = (
-    <div className="rvs-switcher" style={FALLBACK_SWITCHER_STYLE} role="region" aria-label="Variant switcher">
+    <div
+      className="inline-flex items-center gap-2.5 px-3 py-2 rounded-full border border-white/20 bg-black/80 text-white backdrop-blur-md shadow-xl font-[Inter,-apple-system,BlinkMacSystemFont,'Segoe_UI',sans-serif]"
+      role="region"
+      aria-label="Variant switcher"
+    >
       {groupOrder.length > 1 ? (
-        <label className="rvs-group-select-wrapper">
-          <span className="rvs-visually-hidden">Active group</span>
+        <label className="inline-flex">
+          <span className="sr-only">Active group</span>
           <select
-            className="rvs-group-select"
-            style={FALLBACK_SELECT_STYLE}
+            className="appearance-none border border-white/20 rounded-full bg-white/5 text-white px-2.5 py-0.5 text-xs"
             value={activeGroup.id}
-            onChange={(event) => setActiveGroup(event.target.value)}
+            onChange={(event) => {
+              setActiveGroup(event.target.value);
+              event.target.blur();
+            }}
           >
             {groupOrder.map((groupId) => {
               const group = groups[groupId];
@@ -117,18 +60,17 @@ export function VariantSwitcher() {
       <button
         type="button"
         aria-label="Previous variant"
-        className="rvs-nav-button"
-        style={FALLBACK_BUTTON_STYLE}
+        className="appearance-none border-0 rounded-full w-6 h-6 cursor-pointer text-neutral-100 bg-transparent text-[13px] leading-none hover:bg-white/15"
         onClick={() => previousOption(activeGroup.id)}
       >
         {"<"}
       </button>
 
-      <div className="rvs-label" style={FALLBACK_LABEL_STYLE}>
-        <strong className="rvs-counter" style={FALLBACK_COUNTER_STYLE}>
+      <div className="inline-flex items-center gap-3 whitespace-nowrap">
+        <strong className="text-sm opacity-90">
           {activeOptionIndex}/{optionsCount}
         </strong>
-        <span className="rvs-option-name" style={FALLBACK_OPTION_NAME_STYLE}>
+        <span className="text-sm leading-tight font-medium">
           {activeOption.label}
         </span>
       </div>
@@ -136,8 +78,7 @@ export function VariantSwitcher() {
       <button
         type="button"
         aria-label="Next variant"
-        className="rvs-nav-button"
-        style={FALLBACK_BUTTON_STYLE}
+        className="appearance-none border-0 rounded-full w-6 h-6 cursor-pointer text-neutral-100 bg-transparent text-[13px] leading-none hover:bg-white/15"
         onClick={() => nextOption(activeGroup.id)}
       >
         {">"}
@@ -150,7 +91,7 @@ export function VariantSwitcher() {
   }
 
   return createPortal(
-    <div style={FALLBACK_FIXED_STYLE}>
+    <div className="fixed left-1/2 bottom-5 -translate-x-1/2 z-[9999]">
       {switcherNode}
     </div>,
     document.body
