@@ -8,7 +8,7 @@ Initial release.
 
 - `VariantProvider`: top-level context. Owns all state, handles persistence, URL sync, and keyboard shortcuts. Auto-renders the floating switcher in non-production environments.
 - `VariantGroup`: registers a named group of variants. Accepts `name`, `disabled`.
-- `VariantOption`: registers a single variant option. Accepts `id`, `label`, `default`, `disabled`.
+- `VariantOption`: registers a single variant option. Accepts `name`, `label`, `default`, `disabled`.
 - `VariantSwitcher`: floating pill UI portaled to `document.body`. Renders automatically via `VariantProvider`; can also be placed manually.
 
 ### Hook

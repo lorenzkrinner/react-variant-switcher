@@ -142,6 +142,7 @@
   height: 12px;
   color: var(--muted-foreground);
   pointer-events: none;
+  z-index: 1;
 }
 
 /* ── Counter badge ── */
