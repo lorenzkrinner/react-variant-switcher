@@ -1,5 +1,6 @@
 import { type CSSProperties, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
+import { NavArrowDown, NavArrowLeftSolid, NavArrowRightSolid } from "iconoir-react";
 import { useVariantContext } from "../provider/VariantProvider";
 
 export interface VariantSwitcherProps {
@@ -8,7 +9,7 @@ export interface VariantSwitcherProps {
 }
 
 function SwitcherContent({ className, style }: VariantSwitcherProps) {
-  const { groups, groupOrder, activeGroupId, setActiveGroup, previousOption, nextOption } =
+  const { groups, groupOrder, activeGroupId, setActive, setActiveGroup, previousOption, nextOption } =
     useVariantContext();
 
   const enabledGroupOrder = useMemo(
@@ -40,16 +41,29 @@ function SwitcherContent({ className, style }: VariantSwitcherProps) {
 
   const switcherNode = (
     <div
-      className={"inline-flex items-center gap-2.5 px-3 py-2 rounded-full border border-white/20 bg-black/80 text-white backdrop-blur-md shadow-xl font-[Inter,-apple-system,BlinkMacSystemFont,'Segoe_UI',sans-serif]" + (className ? ` ${className}` : "")}
+      className={
+        "inline-flex h-fit w-fit shrink-0 items-center justify-center gap-2 rounded-full border border-zinc-800/80 bg-zinc-900 p-1 font-sans text-white shadow-xl backdrop-blur-md" +
+        (className ? ` ${className}` : "")
+      }
       style={style}
       role="region"
       aria-label="Variant switcher"
     >
+      <button
+        type="button"
+        aria-label="Previous variant"
+        className="inline-flex size-7 cursor-pointer appearance-none items-center justify-center rounded-full border-0 bg-transparent leading-none text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+        onClick={() => previousOption(activeGroup.id)}
+      >
+        <NavArrowLeftSolid className="size-4" />
+      </button>
+  
+      <div className="h-4 w-px -ml-1 mr-1 bg-zinc-800" />
+
       {enabledGroupOrder.length > 1 ? (
-        <label className="inline-flex">
-          <span className="sr-only">Active group</span>
+        <label className="group relative inline-flex items-center">
           <select
-            className="appearance-none border border-white/20 rounded-full bg-white/5 text-white px-2.5 py-0.5 text-xs"
+            className="appearance-none rounded-full bg-white/5 py-0.5 pl-2.5 pr-6 text-xs text-zinc-300 transition-colors focus-visible:outline-0 field-sizing-content"
             value={activeGroup.id}
             onChange={(event) => {
               setActiveGroup(event.target.value);
@@ -65,34 +79,46 @@ function SwitcherContent({ className, style }: VariantSwitcherProps) {
               );
             })}
           </select>
+          <NavArrowDown className="pointer-events-none absolute right-2 size-3 text-zinc-400 transition-colors group-hover:text-zinc-200" />
         </label>
       ) : null}
-
-      <button
-        type="button"
-        aria-label="Previous variant"
-        className="appearance-none border-0 rounded-full w-6 h-6 cursor-pointer text-neutral-100 bg-transparent text-[13px] leading-none hover:bg-white/15"
-        onClick={() => previousOption(activeGroup.id)}
-      >
-        {"<"}
-      </button>
-
-      <div className="inline-flex items-center gap-3 whitespace-nowrap">
-        <strong className="text-sm opacity-90">
-          {activeOptionIndex}/{optionsCount}
-        </strong>
-        <span className="text-sm leading-tight font-medium">
+  
+      {activeGroup.options.length > 1 ? (
+        <label className="group relative inline-flex items-center">
+          <span className="absolute left-2 text-[10px] font-mono font-normal text-zinc-400">
+            {activeOptionIndex}/{optionsCount}
+          </span>
+          <select
+            className="appearance-none rounded-full bg-white/5 py-0.5 pr-6 pl-8 text-xs text-zinc-400 transition-colors group-hover:text-zinc-200 focus-visible:outline-0 field-sizing-content"
+            value={activeOption.id}
+            onChange={(event) => {
+              setActive(activeGroup.id, event.target.value);
+              event.target.blur();
+            }}
+          >
+            {activeGroup.options.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <NavArrowDown className="pointer-events-none absolute right-2 size-3 text-zinc-400 transition-colors group-hover:text-zinc-200" />
+        </label>
+      ) : (
+        <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-xs font-normal tracking-normal text-zinc-400">
           {activeOption.label}
         </span>
-      </div>
-
+      )}
+  
+      <div className="h-4 w-px ml-1 -mr-1 bg-zinc-800" />
+  
       <button
         type="button"
         aria-label="Next variant"
-        className="appearance-none border-0 rounded-full w-6 h-6 cursor-pointer text-neutral-100 bg-transparent text-[13px] leading-none hover:bg-white/15"
+        className="inline-flex size-7 cursor-pointer appearance-none items-center justify-center rounded-full border-0 bg-transparent leading-none text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
         onClick={() => nextOption(activeGroup.id)}
       >
-        {">"}
+        <NavArrowRightSolid className="size-4" />
       </button>
     </div>
   );

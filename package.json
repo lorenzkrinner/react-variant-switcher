@@ -29,7 +29,8 @@
     "ui"
   ],
   "repository": {
-    "type": "git"
+    "type": "git",
+    "url": "https://github.com/lorenzkrinner/react-variant-switcher.git"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
@@ -44,7 +45,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run clean && npm run lint && npm run test && npm run build"
+    "prepublish": "pnpm run clean && pnpm run lint && pnpm run test && pnpm run build"
   },
   "devDependencies": {
     "@eslint/js": "^9.24.0",
@@ -63,6 +64,7 @@
     "tsup": "^8.4.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.29.1",
+    "iconoir-react": "^7.11.0",
     "vitest": "^3.1.1"
   }
 }
