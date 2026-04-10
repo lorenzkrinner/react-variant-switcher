@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
-import { Option, VariantGroup, VariantProvider } from "../index";
+import { VariantGroup, VariantOption, VariantProvider } from "../index";
 
 describe("VariantProvider", () => {
   beforeEach(() => {
@@ -12,12 +12,12 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero">
-          <Option id="a">
+          <VariantOption id="a">
             <div data-testid="option-a">Option A</div>
-          </Option>
-          <Option id="b">
+          </VariantOption>
+          <VariantOption id="b">
             <div data-testid="option-b">Option B</div>
-          </Option>
+          </VariantOption>
         </VariantGroup>
       </VariantProvider>
     );
@@ -30,12 +30,12 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider storageKey="test-key">
         <VariantGroup name="hero">
-          <Option id="a">
+          <VariantOption id="a">
             <div data-testid="option-a">Option A</div>
-          </Option>
-          <Option id="b">
+          </VariantOption>
+          <VariantOption id="b">
             <div data-testid="option-b">Option B</div>
-          </Option>
+          </VariantOption>
         </VariantGroup>
       </VariantProvider>
     );
@@ -60,12 +60,12 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider syncWithUrl>
         <VariantGroup name="hero">
-          <Option id="a">
+          <VariantOption id="a">
             <div data-testid="option-a">Option A</div>
-          </Option>
-          <Option id="b">
+          </VariantOption>
+          <VariantOption id="b">
             <div data-testid="option-b">Option B</div>
-          </Option>
+          </VariantOption>
         </VariantGroup>
       </VariantProvider>
     );
@@ -79,15 +79,15 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero">
-          <Option id="a">
+          <VariantOption id="a">
             <div data-testid="option-a">Option A</div>
-          </Option>
-          <Option id="b" default>
+          </VariantOption>
+          <VariantOption id="b" default>
             <div data-testid="option-b">Option B</div>
-          </Option>
-          <Option id="c">
+          </VariantOption>
+          <VariantOption id="c">
             <div data-testid="option-c">Option C</div>
-          </Option>
+          </VariantOption>
         </VariantGroup>
       </VariantProvider>
     );
@@ -101,16 +101,71 @@ describe("VariantProvider", () => {
     render(
       <VariantProvider syncWithUrl>
         <VariantGroup name="hero">
-          <Option id="a">
+          <VariantOption id="a">
             <div data-testid="option-a">Option A</div>
-          </Option>
-          <Option id="b">
+          </VariantOption>
+          <VariantOption id="b">
             <div data-testid="option-b">Option B</div>
-          </Option>
+          </VariantOption>
         </VariantGroup>
       </VariantProvider>
     );
 
     expect(window.location.search).toBe("");
+  });
+
+  it("renders all options when provider is disabled", () => {
+    render(
+      <VariantProvider disabled>
+        <VariantGroup name="hero">
+          <VariantOption id="a">
+            <div data-testid="option-a">Option A</div>
+          </VariantOption>
+          <VariantOption id="b">
+            <div data-testid="option-b">Option B</div>
+          </VariantOption>
+        </VariantGroup>
+      </VariantProvider>
+    );
+
+    expect(screen.getByTestId("option-a")).toBeInTheDocument();
+    expect(screen.getByTestId("option-b")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Variant switcher" })).not.toBeInTheDocument();
+  });
+
+  it("renders all options when a group is disabled", () => {
+    render(
+      <VariantProvider>
+        <VariantGroup name="hero" disabled>
+          <VariantOption id="a">
+            <div data-testid="option-a">Option A</div>
+          </VariantOption>
+          <VariantOption id="b">
+            <div data-testid="option-b">Option B</div>
+          </VariantOption>
+        </VariantGroup>
+      </VariantProvider>
+    );
+
+    expect(screen.getByTestId("option-a")).toBeInTheDocument();
+    expect(screen.getByTestId("option-b")).toBeInTheDocument();
+  });
+
+  it("renders a disabled option even when it is not active", () => {
+    render(
+      <VariantProvider>
+        <VariantGroup name="hero">
+          <VariantOption id="a">
+            <div data-testid="option-a">Option A</div>
+          </VariantOption>
+          <VariantOption id="b" disabled>
+            <div data-testid="option-b">Option B</div>
+          </VariantOption>
+        </VariantGroup>
+      </VariantProvider>
+    );
+
+    expect(screen.getByTestId("option-a")).toBeInTheDocument();
+    expect(screen.getByTestId("option-b")).toBeInTheDocument();
   });
 });

@@ -4,11 +4,11 @@
 
 ## Features
 
-- Provider + group + option API
+- Provider + group + variant-option API
 - Floating switcher UI with previous/next controls
 - Keyboard shortcuts (`ArrowLeft`, `ArrowRight`, `v` to toggle switcher)
 - `localStorage` persistence
-- Optional URL query syncing (`?groupId=optionId`)
+- Optional URL query syncing (`?groupName=optionId`)
 
 ## Installation
 
@@ -22,20 +22,19 @@ npm install react-variant-switcher
 import {
   VariantProvider,
   VariantGroup,
-  Option
+  VariantOption
 } from "react-variant-switcher";
-import "react-variant-switcher/styles.css";
 
 export function App() {
   return (
     <VariantProvider syncWithUrl>
       <VariantGroup name="quote" title="Hero quote">
-        <Option id="centered" label="Centered quote" default>
+        <VariantOption id="centered" label="Centered quote" default>
           <section>Centered quote version</section>
-        </Option>
-        <Option id="left" label="Left quote">
+        </VariantOption>
+        <VariantOption id="left" label="Left quote">
           <section>Left aligned version</section>
-        </Option>
+        </VariantOption>
       </VariantGroup>
     </VariantProvider>
   );
@@ -49,6 +48,7 @@ export function App() {
 ```tsx
 type VariantProviderProps = {
   children: ReactNode;
+  disabled?: boolean;
   defaultGroupId?: string;
   showSwitcher?: boolean;
   enablePersistence?: boolean; // default true
@@ -65,23 +65,31 @@ type VariantProviderProps = {
 type VariantGroupProps = {
   name: string;
   title?: string;
+  disabled?: boolean;
   children: ReactNode;
 };
 ```
 
-### `Option`
+### `VariantOption`
 
 ```tsx
-type OptionProps = {
+type VariantOptionProps = {
   id: string;
   label?: string;
   default?: boolean;
+  disabled?: boolean;
   children: ReactNode;
 };
 ```
 
 If at least one option has `default`, the first `default` option in declaration order is selected.
 If none are marked `default`, the first option is selected.
+
+### Disabled behavior
+
+- `VariantProvider disabled` renders all variant content and hides the switcher.
+- `VariantGroup disabled` renders all options in that group.
+- `VariantOption disabled` always renders that option and excludes it from switching.
 
 ### `useVariant(groupId)`
 
@@ -92,7 +100,7 @@ Returns:
 
 ## Example
 
-A runnable Vite example is included in `[examples/basic](examples/basic)`.
+A runnable Vite example is included in [`examples/basic`](examples/basic).
 
 
 ## Development

@@ -10,7 +10,7 @@ import {
 } from "react";
 import { loadSelectionsFromStorage, saveSelectionsToStorage } from "../state/persistence";
 import { readSelectionFromUrl, writeSelectionsToUrl } from "../state/urlSync";
-import { VariantSwitcher } from "../ui/VariantSwitcher";
+import { VariantSwitcher } from "../components/VariantSwitcher";
 
 export interface VariantOptionDefinition {
   id: string;
@@ -44,6 +44,7 @@ interface VariantContextValue {
   groupOrder: string[];
   activeGroupId?: string;
   isSwitcherVisible: boolean;
+  isDisabled: boolean;
   registerGroup: (groupId: string, name: string, title?: string) => void;
   unregisterGroup: (groupId: string) => void;
   registerOption: (input: RegisterOptionInput) => void;
@@ -57,6 +58,7 @@ interface VariantContextValue {
 
 export interface VariantProviderProps {
   children: ReactNode;
+  disabled?: boolean;
   defaultGroupId?: string;
   showSwitcher?: boolean;
   enablePersistence?: boolean;
@@ -171,6 +173,7 @@ const cycleOption = (group: VariantGroupDefinition, direction: 1 | -1): string |
 
 export function VariantProvider({
   children,
+  disabled = false,
   defaultGroupId,
   showSwitcher,
   enablePersistence = true,
@@ -446,7 +449,7 @@ export function VariantProvider({
   ]);
 
   useEffect(() => {
-    if (!enableKeyboardShortcuts) {
+    if (!enableKeyboardShortcuts || disabled) {
       return;
     }
 
@@ -477,7 +480,7 @@ export function VariantProvider({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [enableKeyboardShortcuts, nextOption, previousOption, store.activeGroupId]);
+  }, [disabled, enableKeyboardShortcuts, nextOption, previousOption, store.activeGroupId]);
 
   const contextValue = useMemo<VariantContextValue>(() => {
     return {
@@ -485,6 +488,7 @@ export function VariantProvider({
       groupOrder: store.groupOrder,
       activeGroupId: store.activeGroupId,
       isSwitcherVisible,
+      isDisabled: disabled,
       registerGroup,
       unregisterGroup,
       registerOption,
@@ -497,6 +501,7 @@ export function VariantProvider({
     };
   }, [
     isSwitcherVisible,
+    disabled,
     nextOption,
     previousOption,
     registerGroup,
@@ -513,7 +518,7 @@ export function VariantProvider({
   return (
     <VariantContext.Provider value={contextValue}>
       {children}
-      {isSwitcherVisible ? <VariantSwitcher /> : null}
+      {!disabled && isSwitcherVisible ? <VariantSwitcher /> : null}
     </VariantContext.Provider>
   );
 }

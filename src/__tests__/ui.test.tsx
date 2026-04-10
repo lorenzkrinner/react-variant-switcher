@@ -1,7 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
-import { Option, VariantGroup, VariantProvider } from "../index";
+import { VariantGroup, VariantOption, VariantProvider } from "../index";
 
 describe("VariantSwitcher UI", () => {
   beforeEach(() => {
@@ -15,12 +15,12 @@ describe("VariantSwitcher UI", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero">
-          <Option id="left" label="Left">
+          <VariantOption id="left" label="Left">
             <div data-testid="left-variant">Left</div>
-          </Option>
-          <Option id="center" label="Centered quote">
+          </VariantOption>
+          <VariantOption id="center" label="Centered quote">
             <div data-testid="center-variant">Centered quote</div>
-          </Option>
+          </VariantOption>
         </VariantGroup>
       </VariantProvider>
     );
@@ -40,12 +40,12 @@ describe("VariantSwitcher UI", () => {
     render(
       <VariantProvider>
         <VariantGroup name="hero">
-          <Option id="v1">
+          <VariantOption id="v1">
             <div data-testid="v1-variant">V1</div>
-          </Option>
-          <Option id="v2">
+          </VariantOption>
+          <VariantOption id="v2">
             <div data-testid="v2-variant">V2</div>
-          </Option>
+          </VariantOption>
         </VariantGroup>
       </VariantProvider>
     );
@@ -71,12 +71,12 @@ describe("VariantSwitcher UI", () => {
     render(
       <VariantProvider syncWithUrl urlParamNames={{ hero: "heroVariant" }}>
         <VariantGroup name="hero">
-          <Option id="v1">
+          <VariantOption id="v1">
             <div data-testid="v1-variant">V1</div>
-          </Option>
-          <Option id="v2">
+          </VariantOption>
+          <VariantOption id="v2">
             <div data-testid="v2-variant">V2</div>
-          </Option>
+          </VariantOption>
         </VariantGroup>
       </VariantProvider>
     );
