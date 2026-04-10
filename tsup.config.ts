@@ -6,6 +6,5 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: ["react", "react-dom"],
-  onSuccess: "cp src/styles.css dist/styles.css"
+  external: ["react", "react-dom"]
 });

@@ -1,12 +1,9 @@
-.rvs-fixed {
+.rvs-switcher {
   position: fixed;
   left: 50%;
   bottom: 20px;
   transform: translateX(-50%);
   z-index: 9999;
-}
-
-.rvs-switcher {
   display: inline-flex;
   align-items: center;
   gap: 10px;
