@@ -1,6 +1,6 @@
 {
   "name": "react-variant-switcher",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Switch between React UI variants using declarative Option blocks.",
   "license": "MIT",
   "type": "module",
