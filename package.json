@@ -65,5 +65,8 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.29.1",
     "vitest": "^3.1.1"
+  },
+  "dependencies": {
+    "react-variant-switcher": "link:"
   }
 }
