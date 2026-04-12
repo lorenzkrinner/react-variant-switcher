@@ -16,6 +16,7 @@ const isInputLikeElement = (target: EventTarget | null): boolean => {
 
 interface UseKeyboardShortcutsOptions {
   enabled: boolean;
+  switcherVisible: boolean;
   activeGroupId: string | undefined;
   groupOrder: string[];
   previousOption: (groupId: string) => void;
@@ -28,6 +29,7 @@ interface UseKeyboardShortcutsOptions {
 
 export function useKeyboardShortcuts({
   enabled,
+  switcherVisible,
   activeGroupId,
   groupOrder,
   previousOption,
@@ -50,10 +52,13 @@ export function useKeyboardShortcuts({
         return;
       }
 
-      // ⌘H — toggle switcher visibility
       if (event.metaKey && event.code === "KeyH") {
         event.preventDefault();
         setSwitcherVisible((current) => !current);
+        return;
+      }
+
+      if (!switcherVisible) {
         return;
       }
 
@@ -112,6 +117,7 @@ export function useKeyboardShortcuts({
     };
   }, [
     enabled,
+    switcherVisible,
     activeGroupId,
     groupOrder,
     previousOption,

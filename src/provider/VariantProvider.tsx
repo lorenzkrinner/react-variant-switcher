@@ -77,10 +77,12 @@ const VariantContext = createContext<VariantContextValue | null>(null);
 
 const STORAGE_KEY = "react_variant_switcher_config";
 
-const getDefaultSwitcherVisibility = (): boolean => {
+const isProductionEnvironment = (): boolean => {
   const maybeNodeProcess = (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process;
-  return maybeNodeProcess?.env?.NODE_ENV !== "production";
+  return maybeNodeProcess?.env?.NODE_ENV === "production";
 };
+
+const getDefaultSwitcherVisibility = (): boolean => !isProductionEnvironment();
 
 const resolveActiveOption = (
   options: VariantOptionDefinition[],
@@ -183,6 +185,8 @@ export function VariantProvider({
   const [groupSwitcherOpen, setGroupSwitcherOpen] = useState(false);
   const [previewGroupId, setPreviewGroupId] = useState<string | undefined>(undefined);
   const [customSwitcherCount, setCustomSwitcherCount] = useState(0);
+
+  const effectiveDisabled = disabled || isProductionEnvironment();
 
   const getInitialSelectionForGroup = useCallback((groupId: string, groupName: string): string | undefined => {
     if (syncWithUrl) {
@@ -415,7 +419,7 @@ export function VariantProvider({
   }, []);
 
   useEffect(() => {
-    if (disabled) {
+    if (effectiveDisabled) {
       return;
     }
 
@@ -445,7 +449,7 @@ export function VariantProvider({
       writeSelectionsToUrl(urlSelections);
     }
   }, [
-    disabled,
+    effectiveDisabled,
     disablePersistence,
     hasUserChangedSelection,
     store.groups,
@@ -458,7 +462,8 @@ export function VariantProvider({
   );
 
   useKeyboardShortcuts({
-    enabled: !disableKeyboardShortcuts && !disabled,
+    enabled: !disableKeyboardShortcuts && !effectiveDisabled,
+    switcherVisible: isSwitcherVisible,
     activeGroupId: store.activeGroupId,
     groupOrder: enabledGroupOrder,
     previousOption,
@@ -475,7 +480,7 @@ export function VariantProvider({
       groupOrder: store.groupOrder,
       activeGroupId: store.activeGroupId,
       isSwitcherVisible,
-      isDisabled: disabled,
+      isDisabled: effectiveDisabled,
       hasCustomSwitcher: customSwitcherCount > 0,
       registerGroup,
       unregisterGroup,
@@ -493,7 +498,7 @@ export function VariantProvider({
     };
   }, [
     isSwitcherVisible,
-    disabled,
+    effectiveDisabled,
     customSwitcherCount,
     nextOption,
     previousOption,
@@ -515,8 +520,8 @@ export function VariantProvider({
   return (
     <VariantContext.Provider value={contextValue}>
       {children}
-      {!disabled && isSwitcherVisible ? <AutoSwitcher /> : null}
-      {!disabled && <GroupSwitcherOverlay />}
+      {!effectiveDisabled && isSwitcherVisible ? <AutoSwitcher /> : null}
+      {!effectiveDisabled && <GroupSwitcherOverlay />}
     </VariantContext.Provider>
   );
 }
