@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1 – 2026-04-12
+
+### Changes
+
+- `VariantProvider` is now fully inert in production (`NODE_ENV === "production"`): no switcher, no group overlay, no keyboard listeners, no persistence or URL writes. Consumers can ship the components without gating them behind their own env checks.
+- Variant-switching shortcuts (`Alt+←`, `Alt+→`, `Alt+S`) are now suppressed while the switcher is hidden. `Cmd+H` remains active so the switcher can still be restored from the keyboard.
+
 ## 0.1.0 – 2026-04-10
 
 Initial release.
